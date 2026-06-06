@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pgraph"
+version = "0.1.0"
+description = "Local, portable, graph-based project memory for coding agents"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "kuzu>=0.11.3",
+    "mcp>=1.27",
+    "click>=8.1",
+]
+
+[project.scripts]
+pgraph = "pgraph.cli:main"
+pgraph-mcp = "pgraph.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pgraph*"]

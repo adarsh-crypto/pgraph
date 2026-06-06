@@ -1,0 +1,178 @@
+"""Populate File/Repo nodes from the project folder and ingest git history.
+
+`scan_project` walks the tree (respecting .gitignore-ish defaults) and records
+File nodes plus any nested cloned repos/docs as Repo nodes. `ingest_all_git`
+backfills commit history for the project root and each detected repo as
+Change nodes of kind ``commit``.
+"""
+
+from __future__ import annotations
+
+import datetime as _dt
+import subprocess
+from pathlib import Path
+
+from .capture import lang_for, upsert_file
+from .db import Graph
+from .schema import new_id, now
+
+# Directories we never descend into when scanning project files.
+_SKIP_DIRS = {
+    ".git", ".pgraph", "node_modules", "__pycache__", ".venv", "venv",
+    ".mypy_cache", ".pytest_cache", "dist", "build", ".idea", ".vscode",
+    "target", ".next", ".cache",
+}
+_DOC_DIRS = {"docs", "doc", "documentation"}
+
+
+def _is_git_repo(path: Path) -> bool:
+    return (path / ".git").exists()
+
+
+def scan_project(g: Graph, root: str | Path, max_files: int = 5000) -> dict:
+    """Record File nodes for tracked-looking files and Repo nodes for nested clones."""
+    root = Path(root).resolve()
+    files = 0
+    repos = 0
+    seen_repo_roots: set[Path] = set()
+
+    for dirpath, dirnames, filenames in _walk(root):
+        d = Path(dirpath)
+        # Detect a nested cloned repo (not the project root itself).
+        if d != root and _is_git_repo(d) and d not in seen_repo_roots:
+            kind = "doc" if d.name.lower() in _DOC_DIRS else "repo"
+            _upsert_repo(g, d, kind)
+            seen_repo_roots.add(d)
+            repos += 1
+        for name in filenames:
+            if files >= max_files:
+                break
+            fpath = d / name
+            rel = str(fpath.relative_to(root))
+            upsert_file(g, rel)
+            # Link file to the nearest enclosing detected repo, if any.
+            repo_root = _enclosing_repo(d, seen_repo_roots)
+            if repo_root is not None:
+                _link_file_repo(g, rel, repo_root)
+            files += 1
+
+    return {"files": files, "repos": repos, "root": str(root)}
+
+
+def _walk(root: Path):
+    """os.walk-like generator that prunes skip dirs and hidden dirs."""
+    import os
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [
+            dn for dn in dirnames
+            if dn not in _SKIP_DIRS and not dn.startswith(".")
+        ]
+        yield dirpath, dirnames, filenames
+
+
+def _enclosing_repo(d: Path, repo_roots: set[Path]) -> Path | None:
+    for r in repo_roots:
+        try:
+            d.relative_to(r)
+            return r
+        except ValueError:
+            continue
+    return None
+
+
+def _upsert_repo(g: Graph, path: Path, kind: str) -> str:
+    url = _git_remote(path)
+    rid = new_id()
+    existing = g.one("MATCH (r:Repo {path:$p}) RETURN r.id AS id", {"p": str(path)})
+    if existing:
+        return existing["id"]
+    g.run(
+        "CREATE (r:Repo {id:$id, name:$name, url:$url, path:$path, kind:$kind})",
+        {"id": rid, "name": path.name, "url": url, "path": str(path), "kind": kind},
+    )
+    return rid
+
+
+def _link_file_repo(g: Graph, rel_path: str, repo_root: Path) -> None:
+    repo = g.one("MATCH (r:Repo {path:$p}) RETURN r.id AS id", {"p": str(repo_root)})
+    if not repo:
+        return
+    existing = g.one(
+        "MATCH (f:File {path:$fp})-[:IN_REPO]->(r:Repo {path:$rp}) RETURN r.id AS id",
+        {"fp": rel_path, "rp": str(repo_root)},
+    )
+    if not existing:
+        g.run(
+            "MATCH (f:File {path:$fp}),(r:Repo {path:$rp}) CREATE (f)-[:IN_REPO]->(r)",
+            {"fp": rel_path, "rp": str(repo_root)},
+        )
+
+
+# -- git -------------------------------------------------------------------
+def _git_remote(repo: Path) -> str:
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(repo), "remote", "get-url", "origin"],
+            capture_output=True, text=True, timeout=10,
+        )
+        return out.stdout.strip() if out.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def ingest_all_git(g: Graph, root: str | Path, limit: int = 200) -> dict:
+    """Ingest commit history for the project root and every detected Repo node."""
+    root = Path(root).resolve()
+    repos = [root] if _is_git_repo(root) else []
+    for r in g.all("MATCH (r:Repo) RETURN r.path AS path"):
+        p = Path(r["path"])
+        if p not in repos:
+            repos.append(p)
+    total = 0
+    for repo in repos:
+        total += _ingest_git_repo(g, repo, limit)
+    return {"repos_ingested": len(repos), "commits": total}
+
+
+def _ingest_git_repo(g: Graph, repo: Path, limit: int) -> int:
+    if not _is_git_repo(repo):
+        return 0
+    fmt = "%H%x1f%aI%x1f%s"  # hash, author date ISO, subject — unit-separated
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(repo), "log", f"-{limit}", f"--pretty=format:{fmt}"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return 0
+    if out.returncode != 0:
+        return 0
+    count = 0
+    for line in out.stdout.splitlines():
+        parts = line.split("\x1f")
+        if len(parts) != 3:
+            continue
+        sha, iso, subject = parts
+        # Idempotent: a commit's Change id is derived from its sha + repo.
+        cid = f"commit:{repo.name}:{sha}"
+        if g.one("MATCH (c:Change {id:$id}) RETURN c.id AS id", {"id": cid}):
+            continue
+        ts = _parse_iso(iso)
+        g.run(
+            """CREATE (c:Change {id:$id, kind:'commit', path:$path, summary:$summary,
+                                 diff_stat:$sha, ts:$ts})""",
+            {"id": cid, "path": str(repo.name), "summary": subject, "sha": sha[:12], "ts": ts},
+        )
+        count += 1
+    return count
+
+
+def _parse_iso(iso: str) -> _dt.datetime:
+    try:
+        dt = _dt.datetime.fromisoformat(iso)
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(_dt.timezone.utc).replace(tzinfo=None)
+        return dt.replace(microsecond=0)
+    except ValueError:
+        return now()
