@@ -7,7 +7,7 @@ timestamped — so an agent can query a small, targeted slice of project history
 instead of re-reading a growing markdown log on every turn.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 # Directory layout inside a project that uses pgraph.
 PGRAPH_DIR = ".pgraph"

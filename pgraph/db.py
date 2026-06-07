@@ -355,6 +355,32 @@ class Graph:
         ).fetchall()
         return [{"src": r["src_pk"], "dst": r["dst_pk"]} for r in rows]
 
+    def orphan_edges(self) -> int:
+        """Count edges whose source or target node no longer exists.
+
+        A healthy graph has zero — every edge endpoint should resolve to a node.
+        """
+        row = self._conn.execute(
+            """SELECT count(*) AS c FROM edges e
+               WHERE NOT EXISTS (
+                   SELECT 1 FROM nodes n WHERE n.label=e.src_label AND n.pk=e.src_pk)
+                  OR NOT EXISTS (
+                   SELECT 1 FROM nodes n WHERE n.label=e.dst_label AND n.pk=e.dst_pk)"""
+        ).fetchone()
+        return int(row["c"]) if row else 0
+
+    def fts_count(self) -> int:
+        """Number of rows in the FTS index (0 if FTS5 unavailable)."""
+        if not self.fts_enabled:
+            return 0
+        row = self._conn.execute("SELECT count(*) AS c FROM node_fts").fetchone()
+        return int(row["c"]) if row else 0
+
+    def pragma(self, name: str) -> Any:
+        """Read a single PRAGMA value (e.g. 'journal_mode', 'busy_timeout')."""
+        row = self._conn.execute(f"PRAGMA {name}").fetchone()
+        return row[0] if row else None
+
     # -- search ------------------------------------------------------------
     def search(
         self, term: str, labels: list[str] | None = None, limit: int = 20

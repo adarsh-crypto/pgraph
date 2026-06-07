@@ -8,10 +8,47 @@ explain them) instead of re-reading a whole markdown log.
 
 from __future__ import annotations
 
+import datetime as _dt
+import json
 from typing import Any
 
 from .db import Graph
 from .schema import NODE_LABELS, REL_TYPES
+
+# How much each change kind is worth when ranking what to surface. Decisions are
+# scored separately (they're the scarce, high-value "why"); among changes, a
+# human-authored commit/create outranks an auto-captured edit.
+_KIND_WEIGHT = {"commit": 1.6, "create": 1.3, "delete": 1.2, "edit": 1.0}
+
+# Recency half-life in days: a change this many days older than the newest one
+# in the candidate set is worth half as much. Decay is computed relative to the
+# newest timestamp in the set (not wall-clock), so it's deterministic.
+_HALF_LIFE_DAYS = 30.0
+
+
+def _parse_ts(v: Any) -> _dt.datetime | None:
+    if isinstance(v, _dt.datetime):
+        return v
+    if isinstance(v, str):
+        try:
+            return _dt.datetime.fromisoformat(v)
+        except ValueError:
+            return None
+    return None
+
+
+def _recency_factor(ts: Any, newest: _dt.datetime | None) -> float:
+    """Exponential-decay weight in (0, 1], 1.0 for the newest item."""
+    t = _parse_ts(ts)
+    if t is None or newest is None:
+        return 1.0
+    age_days = max(0.0, (newest - t).total_seconds() / 86400.0)
+    return 0.5 ** (age_days / _HALF_LIFE_DAYS)
+
+
+def _cost(obj: Any) -> int:
+    """Character cost of an object once serialized — a cheap token proxy."""
+    return len(json.dumps(obj, default=str))
 
 
 def _iso(v: Any) -> Any:
@@ -52,7 +89,7 @@ def file_history(g: Graph, path: str) -> dict[str, Any]:
     change_nodes = g.in_neighbors("AFFECTS", "File", path, "Change", order_by="ts", desc=True)
     changes = [_pick(c, "id", "kind", "summary", "diff_stat", "ts") for c in change_nodes]
     decision_nodes = g.in_neighbors("ABOUT", "File", path, "Decision", order_by="ts", desc=True)
-    decisions = [_pick(d, "id", "title", "body", "ts") for d in decision_nodes]
+    decisions = [_pick(d, "id", "title", "body", "status", "ts") for d in decision_nodes]
     return {"path": path, "changes": changes, "decisions": decisions}
 
 
@@ -129,6 +166,70 @@ def status(g: Graph) -> dict[str, Any]:
     }
 
 
+def diagnose(g: Graph) -> dict[str, Any]:
+    """Health diagnostics: a list of checks with ok/warn/error and an overall verdict.
+
+    Surfaces the things that quietly go wrong in a multi-tool setup: missing
+    durability pragmas, a stale or missing JSONL export, orphaned edges, a
+    full-text index that drifted out of sync, or an unsupported SQLite build.
+    """
+    import os
+    from pathlib import Path
+
+    from .db import export_dir
+
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, level: str, detail: str) -> None:
+        checks.append({"check": name, "level": level, "detail": detail})
+
+    st = status(g)
+    total_nodes = st["totals"]["nodes"]
+
+    # Durability pragmas.
+    jm = str(g.pragma("journal_mode") or "").lower()
+    add("journal_mode", "ok" if jm == "wal" else "warn", f"journal_mode={jm or '?'}")
+    bt = int(g.pragma("busy_timeout") or 0)
+    add("busy_timeout", "ok" if bt >= 1000 else "warn", f"busy_timeout={bt}ms")
+
+    # Integrity: every edge endpoint resolves to a node.
+    orphans = g.orphan_edges()
+    add("orphan_edges", "ok" if orphans == 0 else "error",
+        "no orphaned edges" if orphans == 0 else f"{orphans} edge(s) point at missing nodes")
+
+    # Full-text index health.
+    if g.fts_enabled:
+        indexed = g.fts_count()
+        # Not every node is indexable (only those with searchable text), so the
+        # index can legitimately be smaller; flag only an empty index on a
+        # non-empty graph, which means it was never built (run `pgraph import`).
+        if total_nodes > 0 and indexed == 0:
+            add("fts_index", "warn", "FTS index empty on a non-empty graph — run `pgraph import` to rebuild")
+        else:
+            add("fts_index", "ok", f"FTS5 enabled, {indexed} rows indexed")
+    else:
+        add("fts_index", "warn", "FTS5 not available in this SQLite build — search falls back to substring scan")
+
+    # Export freshness.
+    exp = export_dir(g.root) / "nodes.jsonl"
+    if not exp.exists():
+        add("export", "warn", "no JSONL export yet — run `pgraph export` to create a portable snapshot")
+    else:
+        try:
+            exported = sum(1 for line in exp.read_text().splitlines() if line.strip())
+        except OSError:
+            exported = -1
+        if exported == total_nodes:
+            add("export", "ok", f"export in sync ({exported} nodes)")
+        else:
+            add("export", "warn",
+                f"export has {exported} nodes but the live graph has {total_nodes} — run `pgraph export`")
+
+    levels = {c["level"] for c in checks}
+    overall = "error" if "error" in levels else ("warn" if "warn" in levels else "ok")
+    return {"overall": overall, "checks": checks, "totals": st["totals"]}
+
+
 def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
     """A compact markdown brief of where the project stands — for session start.
 
@@ -161,7 +262,12 @@ def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
             lines.append(f"- `{c.get('path', '?')}` — {c.get('kind', '?')}{(': ' + note) if note else ''}")
         lines.append("")
 
-    decision_nodes = g.match_nodes("Decision", order_by="ts", desc=True, limit=5)
+    # Only surface live decisions — a superseded/rejected "why" is noise. Nodes
+    # written before the status field existed have no status and count as live.
+    all_decisions = g.match_nodes("Decision", order_by="ts", desc=True, limit=20)
+    decision_nodes = [
+        d for d in all_decisions if d.get("status", "accepted") == "accepted"
+    ][:5]
     if decision_nodes:
         lines.append("**Recent decisions (the *why*):**")
         for d in decision_nodes:
@@ -190,15 +296,19 @@ def context_pack(
     This is the headline retrieval the whole project exists for: instead of an
     agent re-reading a growing log, it asks for context on a handful of paths
     (or, with no paths, the project's recent activity) and gets back only the
-    most recent, relevant changes and decisions — trimmed to a rough character
-    *budget* (a cheap proxy for tokens).
+    most relevant changes and decisions — trimmed to a rough character *budget*
+    (a cheap proxy for tokens).
+
+    Ranking blends **recency** (exponential decay) with **importance** (change
+    kind; decisions weighted highest), and duplicate edits to the same file with
+    the same summary are collapsed so the budget isn't spent on repetition.
     """
     pack: dict[str, Any] = {"files": [], "recent": [], "open_questions": []}
     used = 0
 
-    def room(obj: dict) -> bool:
+    def room(obj: Any) -> bool:
         nonlocal used
-        cost = sum(len(str(v)) for v in obj.values())
+        cost = _cost(obj)
         if used + cost > budget:
             return False
         used += cost
@@ -209,13 +319,16 @@ def context_pack(
             hist = file_history(g, p)
             entry = {
                 "path": p,
-                "changes": hist["changes"][:5],
+                "changes": _dedupe_changes(hist["changes"])[:5],
                 "decisions": hist["decisions"][:3],
             }
-            if room({"_": entry}):
+            if room(entry):
                 pack["files"].append(entry)
     else:
-        for c in recent_changes(g, limit=15):
+        ranked = _rank_changes(_dedupe_changes(recent_changes(g, limit=50)))
+        for c in ranked:
+            if len(pack["recent"]) >= 15:
+                break
             if room(c):
                 pack["recent"].append(c)
 
@@ -229,3 +342,33 @@ def context_pack(
         }
     pack["_budget"] = {"chars_used": used, "budget": budget}
     return pack
+
+
+def _dedupe_changes(changes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse repeated (path, summary) changes, keeping the newest occurrence.
+
+    Auto-capture hooks fire on every save, so the same file gets many identical
+    "(auto) file write" entries — without this they'd crowd out everything else.
+    Input is assumed newest-first; output preserves that order.
+    """
+    seen: set[tuple[str, str]] = set()
+    out: list[dict[str, Any]] = []
+    for c in changes:
+        key = (c.get("path", ""), c.get("summary", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(c)
+    return out
+
+
+def _rank_changes(changes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Sort changes by importance × recency-decay, highest first (stable)."""
+    timestamps = [_parse_ts(c.get("ts")) for c in changes]
+    newest = max((t for t in timestamps if t is not None), default=None)
+
+    def score(c: dict[str, Any]) -> float:
+        kind_w = _KIND_WEIGHT.get(c.get("kind", ""), 1.0)
+        return kind_w * _recency_factor(c.get("ts"), newest)
+
+    return sorted(changes, key=score, reverse=True)

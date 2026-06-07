@@ -12,7 +12,7 @@ from pathlib import Path
 
 import click
 
-from . import capture, export as export_mod, query, scan as scan_mod
+from . import capture, eval as eval_mod, export as export_mod, query, scan as scan_mod
 from .db import Graph, WriteQueryRejected, assert_read_only, find_project_root
 from .schema import init as schema_init
 
@@ -114,12 +114,27 @@ def log(ctx: click.Context, kind: str, path: str, summary: str, session_id: str 
 @click.option("--body", default="")
 @click.option("--motivates", multiple=True, help="Change id this decision motivates (repeatable).")
 @click.option("--about", multiple=True, help="File path this decision is about (repeatable).")
+@click.option("--supersedes", multiple=True, help="Prior decision id this one replaces (repeatable).")
 @click.pass_context
-def decide(ctx: click.Context, title: str, body: str, motivates: tuple[str, ...], about: tuple[str, ...]) -> None:
+def decide(ctx: click.Context, title: str, body: str, motivates: tuple[str, ...],
+           about: tuple[str, ...], supersedes: tuple[str, ...]) -> None:
     """Record a manual 'why' note (a decision)."""
     with _open(ctx.obj["root"]) as g:
-        did = capture.log_decision(g, title, body, list(motivates), list(about))
+        did = capture.log_decision(
+            g, title, body, list(motivates), list(about), supersedes=list(supersedes)
+        )
     click.echo(did)
+
+
+@main.command("decision-status")
+@click.argument("decision_id")
+@click.argument("status", type=click.Choice(sorted(capture.VALID_DECISION_STATUSES)))
+@click.pass_context
+def decision_status(ctx: click.Context, decision_id: str, status: str) -> None:
+    """Set a decision's lifecycle status (accepted | superseded | rejected)."""
+    with _open(ctx.obj["root"]) as g:
+        capture.set_decision_status(g, decision_id, status)
+    click.echo(f"Decision {decision_id} -> {status}")
 
 
 @main.command("skill")
@@ -160,6 +175,28 @@ def status(ctx: click.Context) -> None:
 
 
 @main.command()
+@click.option("--json", "as_json", is_flag=True, help="Emit raw JSON instead of a readable report.")
+@click.pass_context
+def doctor(ctx: click.Context, as_json: bool) -> None:
+    """Diagnose the graph: durability, integrity, search index, export freshness.
+
+    Exits non-zero if any check is at error level (e.g. orphaned edges).
+    """
+    with _open(ctx.obj["root"]) as g:
+        report = query.diagnose(g)
+    if as_json:
+        _emit(report)
+    else:
+        marks = {"ok": "✓", "warn": "!", "error": "✗"}
+        for c in report["checks"]:
+            click.echo(f"  {marks.get(c['level'], '?')} {c['check']}: {c['detail']}")
+        t = report["totals"]
+        click.echo(f"\noverall: {report['overall'].upper()}  ({t['nodes']} nodes, {t['edges']} edges)")
+    if report["overall"] == "error":
+        raise click.ClickException("doctor found errors (see above)")
+
+
+@main.command()
 @click.argument("paths", nargs=-1)
 @click.option("--budget", default=4000, help="Approximate character budget for the bundle.")
 @click.pass_context
@@ -179,6 +216,16 @@ def search(ctx: click.Context, term: str, labels: tuple[str, ...], limit: int) -
     """Full-text search decisions, changes and files (BM25-ranked when available)."""
     with _open(ctx.obj["root"]) as g:
         _emit(query.search(g, term, labels=list(labels) or None, limit=limit))
+
+
+@main.command("eval")
+@click.argument("paths", nargs=-1)
+@click.option("--budget", default=4000, help="context_pack character budget to evaluate.")
+@click.pass_context
+def eval_cmd(ctx: click.Context, paths: tuple[str, ...], budget: int) -> None:
+    """Measure token savings: flat-log baseline vs. brief / context_pack."""
+    with _open(ctx.obj["root"]) as g:
+        _emit(eval_mod.evaluate(g, paths=list(paths) or None, budget=budget))
 
 
 # -- ingest ----------------------------------------------------------------
