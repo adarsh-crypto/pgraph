@@ -14,6 +14,12 @@ slice — *"what changed in `auth.py` recently and why?"* — instead of re-read
 everything. The graph is just files under `.pgraph/`, so you can zip it, copy it
 between machines, or commit a diffable JSONL export to git.
 
+> **A project, not a repo.** Memory lives at a *project root*, which can contain
+> several repos, docs, and loose files. Initialize `pgraph` once at that root;
+> every command, hook, and the MCP server resolves the graph by walking
+> **upward** from wherever the agent opened — so working inside any nested repo
+> still reads and writes the one shared project memory.
+
 ## Why a graph saves tokens
 
 A flat markdown log forces "read everything to find anything." A graph lets the
@@ -105,6 +111,9 @@ pgraph install-hooks --pgraph-bin "$(command -v pgraph)"
 
 This adds (merging, never clobbering existing hooks):
 
+- a **SessionStart** hook → injects a compact brief of the project's memory
+  (last session, recent changes, recent decisions) so the agent opens already
+  knowing what's been done — in the project root *or any nested repo*;
 - a **PostToolUse** hook on `Write|Edit|NotebookEdit` → records a `Change`
   (auto-opening a session if none is active);
 - a **Stop** hook → ends the open session and writes a fresh JSONL export.

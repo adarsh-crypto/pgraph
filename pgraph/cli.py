@@ -239,6 +239,14 @@ def hook_stop() -> None:
     sys.exit(stop())
 
 
+@main.command("hook-session-start", hidden=True)
+def hook_session_start() -> None:
+    """SessionStart hook entry: print a brief of project memory as context."""
+    from .hook import session_start
+
+    sys.exit(session_start())
+
+
 @main.command()
 @click.argument("query_text")
 @click.pass_context

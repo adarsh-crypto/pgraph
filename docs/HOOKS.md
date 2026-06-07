@@ -12,9 +12,11 @@ From inside a project:
 pgraph install-hooks --pgraph-bin "$(command -v pgraph)"
 ```
 
-This merges two entries into `<project>/.claude/settings.json`
+This merges three entries into `<project>/.claude/settings.json`
 ([`install_hooks.py`](../pgraph/install_hooks.py)):
 
+- a **SessionStart** hook running `pgraph hook-session-start`, which injects a
+  compact brief of the project's memory when a session opens;
 - a **PostToolUse** hook matching `Write|Edit|NotebookEdit`, running
   `pgraph hook-post-tool-use`;
 - a **Stop** hook running `pgraph hook-stop`.
@@ -29,6 +31,22 @@ touched.
 > rather than relying on `pgraph` being on Claude Code's PATH.
 
 ## What each hook does
+
+### SessionStart → `hook-session-start`
+([`hook.session_start`](../pgraph/hook.py))
+
+1. Resolves the project root by walking **up** from the working directory (so
+   opening Claude Code in the project root *or any repo nested inside it*
+   surfaces the one shared memory — see [Portability](PORTABILITY.md)).
+2. Builds a compact markdown brief ([`query.session_brief`](../pgraph/query.py)):
+   the last/open session's intent, the most recent changes, and recent
+   decisions — trimmed to a character budget.
+3. Prints Claude Code hook JSON with `hookSpecificOutput.additionalContext` so
+   the brief is injected into the agent's context automatically. A silent no-op
+   when no graph exists or there's no recorded work yet.
+
+This is what makes "open the agent → it already knows what's been done" work
+with no manual step.
 
 ### PostToolUse → `hook-post-tool-use`
 ([`hook.post_tool_use`](../pgraph/hook.py))
@@ -63,6 +81,9 @@ already there):
 ```jsonc
 {
   "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "/path/to/pgraph hook-session-start" }] }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|NotebookEdit",

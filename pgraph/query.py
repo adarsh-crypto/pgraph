@@ -157,6 +157,63 @@ def status(g: Graph) -> dict[str, Any]:
     }
 
 
+def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
+    """A compact markdown brief of where the project stands — for session start.
+
+    Built to be injected verbatim into an agent's context when it opens in the
+    project (or any nested repo): the last session's intent, the most recent
+    changes, and any open decisions. Trimmed to a rough character *budget* so it
+    stays cheap. Returns ``""`` when there's nothing worth saying yet.
+    """
+    st = status(g)
+    # Nothing worth briefing until there's actual recorded work — a bare graph
+    # holds only the bootstrap Project node.
+    if st["nodes"]["Session"] + st["nodes"]["Change"] + st["nodes"]["Decision"] == 0:
+        return ""
+
+    lines: list[str] = ["# pgraph project memory", ""]
+
+    sess = session_summary(g)
+    if sess:
+        when = sess.get("ended_at") or sess.get("started_at") or ""
+        state = "open" if not sess.get("ended_at") else "last"
+        summary = sess.get("summary") or "(no summary recorded)"
+        lines.append(f"**{state.capitalize()} session** ({sess.get('agent', '?')}, {when}): {summary}")
+        lines.append("")
+
+    recent = recent_changes(g, limit=limit)
+    if recent:
+        lines.append("**Recent changes:**")
+        for c in recent:
+            note = c.get("summary") or ""
+            lines.append(f"- `{c.get('path', '?')}` — {c.get('kind', '?')}{(': ' + note) if note else ''}")
+        lines.append("")
+
+    decisions = g.all(
+        """MATCH (d:Decision)
+           RETURN d.title AS title, d.body AS body, d.ts AS ts
+           ORDER BY d.ts DESC LIMIT 5"""
+    )
+    if decisions:
+        lines.append("**Recent decisions (the *why*):**")
+        for d in decisions:
+            body = (d.get("body") or "").strip().replace("\n", " ")
+            if len(body) > 160:
+                body = body[:157] + "..."
+            lines.append(f"- **{d.get('title', '?')}**{(' — ' + body) if body else ''}")
+        lines.append("")
+
+    lines.append(
+        f"_{st['totals']['nodes']} nodes, {st['totals']['edges']} edges. "
+        "Query more with the `pgraph` MCP tools (`context_pack`, `file_history`, `recent_changes`)._"
+    )
+
+    brief = "\n".join(lines).rstrip() + "\n"
+    if len(brief) > budget:
+        brief = brief[:budget].rstrip() + "\n…(truncated)\n"
+    return brief
+
+
 def context_pack(
     g: Graph, paths: list[str] | None = None, budget: int = 4000
 ) -> dict[str, Any]:

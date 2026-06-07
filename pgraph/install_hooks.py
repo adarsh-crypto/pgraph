@@ -17,6 +17,7 @@ from pathlib import Path
 _POST_MATCHER = "Write|Edit|NotebookEdit"
 _POST_CMD = "pgraph hook-post-tool-use"
 _STOP_CMD = "pgraph hook-stop"
+_SESSION_START_CMD = "pgraph hook-session-start"
 
 
 def _hook_entry(command: str) -> dict:
@@ -47,10 +48,12 @@ def install(root: str | Path, pgraph_bin: str = "pgraph") -> dict:
 
     post_cmd = _POST_CMD.replace("pgraph", pgraph_bin, 1)
     stop_cmd = _STOP_CMD.replace("pgraph", pgraph_bin, 1)
+    session_start_cmd = _SESSION_START_CMD.replace("pgraph", pgraph_bin, 1)
 
     hooks = data.setdefault("hooks", {})
     post = hooks.setdefault("PostToolUse", [])
     stop = hooks.setdefault("Stop", [])
+    session = hooks.setdefault("SessionStart", [])
 
     added = []
     if not _has_command(post, _POST_MATCHER, post_cmd):
@@ -59,6 +62,15 @@ def install(root: str | Path, pgraph_bin: str = "pgraph") -> dict:
     if not _has_command(stop, None, stop_cmd):
         stop.append({"hooks": [_hook_entry(stop_cmd)]})
         added.append("Stop")
+    if not _has_command(session, None, session_start_cmd):
+        session.append({"hooks": [_hook_entry(session_start_cmd)]})
+        added.append("SessionStart")
 
     settings_path.write_text(json.dumps(data, indent=2) + "\n")
-    return {"settings": str(settings_path), "added": added, "post_cmd": post_cmd, "stop_cmd": stop_cmd}
+    return {
+        "settings": str(settings_path),
+        "added": added,
+        "post_cmd": post_cmd,
+        "stop_cmd": stop_cmd,
+        "session_start_cmd": session_start_cmd,
+    }

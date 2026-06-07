@@ -35,8 +35,9 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `cypher` | Run an arbitrary **read-only** Cypher query (escape hatch). |
 | `install-hooks` | Wire auto-capture into `.claude/settings.json`. |
 
-There are also two hidden commands, `hook-post-tool-use` and `hook-stop`, that
-Claude Code invokes with JSON on stdin — you never run these by hand.
+There are also three hidden commands — `hook-session-start`,
+`hook-post-tool-use`, and `hook-stop` — that Claude Code invokes with JSON on
+stdin; you never run these by hand.
 
 ## Detailed usage
 
@@ -130,7 +131,8 @@ the graph. Values are stringified for safe JSON output.
 ```bash
 pgraph install-hooks --pgraph-bin "$(command -v pgraph)"
 ```
-Merges the auto-capture hooks into `<root>/.claude/settings.json` without
+Merges the auto-capture hooks (SessionStart context injection, PostToolUse
+change capture, Stop snapshot) into `<root>/.claude/settings.json` without
 clobbering existing hooks. See [HOOKS.md](HOOKS.md).
 
 ## Exit codes

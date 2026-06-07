@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import capture
+from . import capture, query
 from .db import Graph, find_project_root
 from .schema import init as schema_init
 
@@ -63,6 +63,35 @@ def post_tool_use() -> int:
             capture.log_change(g, kind, rel, summary="(auto) file write", session_id=sid)
     except Exception:
         # Hooks must never break the host agent.
+        return 0
+    return 0
+
+
+def session_start() -> int:
+    """On SessionStart: inject a compact brief of the project's memory.
+
+    Resolves the project root by walking *up* from the cwd, so opening Claude
+    Code in the project root — or in any repo nested inside it — surfaces the
+    one shared memory. Prints the Claude Code hook JSON that injects the brief
+    as additional context. A silent no-op when no graph exists or it's empty.
+    """
+    try:
+        _read_stdin()  # drain stdin; payload unused but Claude Code sends it
+        g = _open_for_cwd()
+        if g is None:
+            return 0
+        with g:
+            brief = query.session_brief(g)
+        if not brief.strip():
+            return 0
+        out = {
+            "hookSpecificOutput": {
+                "hookEventName": "SessionStart",
+                "additionalContext": brief,
+            }
+        }
+        sys.stdout.write(json.dumps(out))
+    except Exception:
         return 0
     return 0
 

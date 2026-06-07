@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- **SessionStart auto-context**: a `hook-session-start` command (wired by
+  `install-hooks`) injects a compact brief of the project's memory — last
+  session, recent changes, recent decisions — when an agent opens, in the
+  project root *or any nested repo*. Backed by `query.session_brief`. This is
+  what makes "open the agent → it already knows what's been done" automatic.
 - `pgraph status` command + `status` MCP tool: node/edge counts and any open
   session — a quick health check.
 - Read-only guard on the `cypher` escape hatch (CLI + MCP): write statements
