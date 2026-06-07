@@ -42,7 +42,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   session — a quick health check.
 - Read-only guard on the escape hatch (CLI + MCP) so the graph can only be
   mutated through the validated capture path.
-- GitHub Actions CI running the test suite.
 - `CONTRIBUTING.md`, issue/PR templates, and a `[dev]` extra for `pytest`.
 - This repo now dogfoods pgraph: its own development memory is committed as a
   JSONL export under `.pgraph/export/`.

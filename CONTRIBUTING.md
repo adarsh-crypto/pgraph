@@ -15,7 +15,7 @@ pip install -e ".[dev]"
 
 ## Before you open a PR
 
-1. **Run the tests** — `pytest -q` must be green (CI runs them on 3.11–3.14).
+1. **Run the tests** — `pytest -q` must be green (on any Python 3.11+).
 2. **Add a test** for any behaviour you change or add.
 3. **Keep SQL parameterized** — go through the typed `Graph` API and never
    string-format user values into a query. The read-only `sql` passthrough must

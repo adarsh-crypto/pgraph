@@ -1,8 +1,10 @@
+{"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "0db043c6be5b497d8fc4464a623cfa6d", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "273b11311afe4798841f8d1039e783fd", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "4dd4fd9e962c455eb0a6467d597c528b", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "b3b740d2a6ae4e20b9eb531e27336bec", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "d95dcd51a5984da39b8cd29b68335e32", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "f481794efd1140a388d0f9276b47c67a", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
+{"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "0db043c6be5b497d8fc4464a623cfa6d", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "273b11311afe4798841f8d1039e783fd", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "4dd4fd9e962c455eb0a6467d597c528b", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "b3b740d2a6ae4e20b9eb531e27336bec", "dst": "claude-code"}
@@ -12,12 +14,14 @@
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "0dad2e889f694041a05f40c4f000c874", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "0dc85e5e5d604185a47011a232470944", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "1025539888f34db59d181f4161029db6", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "128daf1eeb0d4081a09749a52a6ce0b3", "dst": "0db043c6be5b497d8fc4464a623cfa6d"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "177d9464435c42faa772fd7a7858dfe3", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "1a27ff8f01c645cfacdbf639184da1f3", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "2353662d036a4f35b512a0dce1aa63f9", "dst": "b3b740d2a6ae4e20b9eb531e27336bec"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "2358863251314669b043d67d471a6a8f", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "2561e9f60f4842659eb5e87ffce82022", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "25c64af53778420fac775111be88387f", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "2c371d76003745f28b6fbd7d43a34e37", "dst": "0db043c6be5b497d8fc4464a623cfa6d"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "3599f8f741624a549f48b6868e9f15b0", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "36aeb3b799984956ac0bf5d4b1988924", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "3994b72dec8d49eabee20cfc85149d17", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
@@ -54,6 +58,7 @@
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "8abb43493bc24eb5812ebc8eb562ae59", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "8cf27ecb4c5941209c098014969bd29d", "dst": "b3b740d2a6ae4e20b9eb531e27336bec"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "9143c5d4b2874570a9a48981f3e54065", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "914a6e6dab554eb3bb6ab7cd25998ce3", "dst": "0db043c6be5b497d8fc4464a623cfa6d"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "9528a31a6b8c41199cdd27066164531a", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "95f4699224f34515bffc9a70166590f9", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "9a77a872770e4637ae6102f6373bf145", "dst": "f481794efd1140a388d0f9276b47c67a"}
@@ -89,12 +94,14 @@
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "0dad2e889f694041a05f40c4f000c874", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "0dc85e5e5d604185a47011a232470944", "dst": "/Users/adarshsinha/.codex/AGENTS.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "1025539888f34db59d181f4161029db6", "dst": "pgraph/cli.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "128daf1eeb0d4081a09749a52a6ce0b3", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "177d9464435c42faa772fd7a7858dfe3", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "1a27ff8f01c645cfacdbf639184da1f3", "dst": "CHANGELOG.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "2353662d036a4f35b512a0dce1aa63f9", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "2358863251314669b043d67d471a6a8f", "dst": "pgraph/scan.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "2561e9f60f4842659eb5e87ffce82022", "dst": "docs/DEVELOPMENT.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "25c64af53778420fac775111be88387f", "dst": "pgraph/hook.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "2c371d76003745f28b6fbd7d43a34e37", "dst": "CHANGELOG.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "3599f8f741624a549f48b6868e9f15b0", "dst": "CHANGELOG.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "36aeb3b799984956ac0bf5d4b1988924", "dst": "docs/ARCHITECTURE.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "3994b72dec8d49eabee20cfc85149d17", "dst": "CONTRIBUTING.md"}
@@ -131,6 +138,7 @@
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "8abb43493bc24eb5812ebc8eb562ae59", "dst": "docs/PORTABILITY.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "8cf27ecb4c5941209c098014969bd29d", "dst": ".gitignore"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "9143c5d4b2874570a9a48981f3e54065", "dst": "docs/DEVELOPMENT.md"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "914a6e6dab554eb3bb6ab7cd25998ce3", "dst": "CONTRIBUTING.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "9528a31a6b8c41199cdd27066164531a", "dst": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/spokesfan-pgraph.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "95f4699224f34515bffc9a70166590f9", "dst": "docs/ARCHITECTURE.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "9a77a872770e4637ae6102f6373bf145", "dst": "docs/HOOKS.md"}

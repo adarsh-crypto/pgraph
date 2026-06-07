@@ -1,6 +1,5 @@
 # pgraph — local, portable, graph-based project memory for coding agents
 
-[![tests](https://github.com/adarsh-crypto/pgraph/actions/workflows/test.yml/badge.svg)](https://github.com/adarsh-crypto/pgraph/actions/workflows/test.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://github.com/adarsh-crypto/pgraph)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
