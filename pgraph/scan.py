@@ -105,32 +105,30 @@ def _enclosing_repo(d: Path, repo_roots: set[Path]) -> Path | None:
     return None
 
 
+def _repo_by_path(g: Graph, path: Path) -> dict | None:
+    matches = g.match_nodes("Repo", where=[("path", "=", str(path))], limit=1)
+    return matches[0] if matches else None
+
+
 def _upsert_repo(g: Graph, path: Path, kind: str) -> str:
-    url = _git_remote(path)
-    rid = new_id()
-    existing = g.one("MATCH (r:Repo {path:$p}) RETURN r.id AS id", {"p": str(path)})
+    existing = _repo_by_path(g, path)
     if existing:
         return existing["id"]
-    g.run(
-        "CREATE (r:Repo {id:$id, name:$name, url:$url, path:$path, kind:$kind})",
+    rid = new_id()
+    url = _git_remote(path)
+    g.add_node(
+        "Repo",
+        rid,
         {"id": rid, "name": path.name, "url": url, "path": str(path), "kind": kind},
     )
     return rid
 
 
 def _link_file_repo(g: Graph, rel_path: str, repo_root: Path) -> None:
-    repo = g.one("MATCH (r:Repo {path:$p}) RETURN r.id AS id", {"p": str(repo_root)})
+    repo = _repo_by_path(g, repo_root)
     if not repo:
         return
-    existing = g.one(
-        "MATCH (f:File {path:$fp})-[:IN_REPO]->(r:Repo {path:$rp}) RETURN r.id AS id",
-        {"fp": rel_path, "rp": str(repo_root)},
-    )
-    if not existing:
-        g.run(
-            "MATCH (f:File {path:$fp}),(r:Repo {path:$rp}) CREATE (f)-[:IN_REPO]->(r)",
-            {"fp": rel_path, "rp": str(repo_root)},
-        )
+    g.add_edge("IN_REPO", "File", rel_path, "Repo", repo["id"])
 
 
 # -- git -------------------------------------------------------------------
@@ -149,7 +147,7 @@ def ingest_all_git(g: Graph, root: str | Path, limit: int = 200) -> dict:
     """Ingest commit history for the project root and every detected Repo node."""
     root = Path(root).resolve()
     repos = [root] if _is_git_repo(root) else []
-    for r in g.all("MATCH (r:Repo) RETURN r.path AS path"):
+    for r in g.match_nodes("Repo"):
         p = Path(r["path"])
         if p not in repos:
             repos.append(p)
@@ -180,13 +178,14 @@ def _ingest_git_repo(g: Graph, repo: Path, limit: int) -> int:
         sha, iso, subject = parts
         # Idempotent: a commit's Change id is derived from its sha + repo.
         cid = f"commit:{repo.name}:{sha}"
-        if g.one("MATCH (c:Change {id:$id}) RETURN c.id AS id", {"id": cid}):
+        if g.get_node("Change", cid) is not None:
             continue
         ts = _parse_iso(iso)
-        g.run(
-            """CREATE (c:Change {id:$id, kind:'commit', path:$path, summary:$summary,
-                                 diff_stat:$sha, ts:$ts})""",
-            {"id": cid, "path": str(repo.name), "summary": subject, "sha": sha[:12], "ts": ts},
+        g.add_node(
+            "Change",
+            cid,
+            {"id": cid, "kind": "commit", "path": str(repo.name),
+             "summary": subject, "diff_stat": sha[:12], "ts": ts},
         )
         count += 1
     return count

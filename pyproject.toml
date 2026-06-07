@@ -4,12 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pgraph"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local, portable, graph-based project memory for coding agents"
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "kuzu>=0.11.3",
     "mcp>=1.27",
     "click>=8.1",
 ]

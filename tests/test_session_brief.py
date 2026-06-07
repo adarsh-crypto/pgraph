@@ -45,7 +45,7 @@ def test_scan_excludes_named_dir(graph, root):
     (root / "skipme" / "b.py").write_text("y")
 
     scan.scan_project(graph, root, exclude=["skipme"])
-    paths = {r["path"] for r in graph.all("MATCH (f:File) RETURN f.path AS path")}
+    paths = {r["path"] for r in graph.match_nodes("File")}
     assert "keep/a.py" in paths
     assert "skipme/b.py" not in paths
 

@@ -12,5 +12,5 @@
 
 - [ ] `pytest -q` passes locally
 - [ ] Added/updated tests for the change
-- [ ] Cypher stays parameterized (no string-formatted values)
+- [ ] SQL stays parameterized (no string-formatted values); `sql` stays read-only
 - [ ] Updated docs under `docs/` if behaviour changed

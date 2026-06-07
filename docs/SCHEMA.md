@@ -1,11 +1,24 @@
 # Graph schema
 
-`pgraph` stores project memory as a Kùzu **property graph**: typed node tables
-and typed relationship tables. The DDL lives in
-[`schema.py`](../pgraph/schema.py) and every statement uses
-`CREATE ... IF NOT EXISTS`, so calling `init()` again is a safe, lightweight
-migration — add a table to the list and the next `init` picks it up without
-touching existing data.
+`pgraph` stores project memory in a single **SQLite** file (Python stdlib
+`sqlite3`) as two physical tables: a generic `nodes` table with a JSON `props`
+blob, plus an `edges` table. The 8 node types and 8 edge types below are the
+**logical** model — they're enforced by the application ([`capture.py`](../pgraph/capture.py))
+and registered in [`schema.py`](../pgraph/schema.py)'s label registry
+(`NODE_LABELS` / `REL_SPECS`), not as separate physical tables. `init()` creates
+the two tables (via `Graph.init_schema()`) and ensures exactly one `Project`
+node; it is still idempotent, so calling it again is safe.
+
+The physical tables are:
+
+- `nodes(label TEXT, pk TEXT, props TEXT, PRIMARY KEY(label, pk))` — `props` is
+  a JSON blob holding all of the node's properties.
+- `edges(rel, src_label, src_pk, dst_label, dst_pk)` — with indexes for fast
+  src/dst lookups.
+
+The node and relationship tables below are logical types; every node row lives
+in the generic `nodes` table (keyed by `label` + primary key) and every edge in
+the `edges` table.
 
 ## Node tables
 
@@ -62,49 +75,64 @@ touching existing data.
 
 ## Timestamps and IDs
 
-- All time columns are Kùzu `TIMESTAMP`. `schema.now()` returns a naive UTC
-  datetime **with microseconds** — rapid same-second edits still sort
+- Timestamps are stored as **ISO-8601 strings** inside the JSON `props` (no
+  native timestamp column). Fixed-format ISO strings sort lexicographically in
+  chronological order, so `ORDER BY` and `>=` comparisons still work as
+  expected. `schema.now()` returns a naive UTC datetime **with microseconds**
+  (serialized to ISO on write) — so rapid same-second edits still sort
   correctly.
 - Node IDs are minted in Python: `schema.new_id()` returns a UUID4 hex.
 - Git commits are the exception: their `Change.id` is
   `commit:<repo-name>:<sha>`, which makes `pgraph ingest-git` idempotent — a
   re-run skips commits already present.
 
-## Example Cypher
+## Example SQL
 
-These run via `pgraph cypher '<query>'` or the MCP `cypher` tool.
+These run via `pgraph sql '<query>'` or the MCP `sql` tool, and are
+**read-only**. Joins go through the `edges` table; node properties are read out
+of the JSON `props` with `json_extract(props, '$.field')`.
 
-```cypher
+```sql
 -- Every change to one file, newest first
-MATCH (c:Change)-[:AFFECTS]->(f:File {path:'src/auth.py'})
-RETURN c.ts, c.kind, c.summary ORDER BY c.ts DESC;
+SELECT json_extract(n.props, '$.ts')      AS ts,
+       json_extract(n.props, '$.kind')    AS kind,
+       json_extract(n.props, '$.summary') AS summary
+FROM edges e
+JOIN nodes n ON n.label = e.src_label AND n.pk = e.src_pk
+WHERE e.rel = 'AFFECTS'
+  AND e.dst_label = 'File'
+  AND e.dst_pk = 'src/auth.py'
+ORDER BY ts DESC;
 
 -- Decisions and the changes they motivated
-MATCH (d:Decision)-[:MOTIVATES]->(c:Change)
-RETURN d.title, c.path, c.summary;
+SELECT json_extract(d.props, '$.title')   AS title,
+       json_extract(c.props, '$.path')    AS path,
+       json_extract(c.props, '$.summary') AS summary
+FROM edges e
+JOIN nodes d ON d.label = e.src_label AND d.pk = e.src_pk
+JOIN nodes c ON c.label = e.dst_label AND c.pk = e.dst_pk
+WHERE e.rel = 'MOTIVATES';
 
--- What did the last session do?
-MATCH (c:Change)-[:IN_SESSION]->(s:Session)
-WHERE s.ended_at IS NULL
-RETURN s.agent_name, c.path, c.summary ORDER BY c.ts DESC;
-
--- Files belonging to a cloned doc repo
-MATCH (f:File)-[:IN_REPO]->(r:Repo {kind:'doc'})
-RETURN r.name, f.path;
+-- All decisions
+SELECT json_extract(props, '$.title') AS title
+FROM nodes
+WHERE label = 'Decision';
 ```
 
-## Why Kùzu, and the version pin
+## Why SQLite (stdlib)
 
-Kùzu is chosen because it is **embedded** (in-process, no server to run),
-**native graph** (index-free adjacency for cheap multi-hop traversal), speaks
-**Cypher**, and stores the whole database as a single on-disk file you can copy.
+SQLite via the stdlib `sqlite3` module is chosen because it is **embedded**
+(in-process, no server to run), **zero-dependency** (ships with Python, no
+compiled artifacts to build or pin), **durable** (WAL mode), and stores the
+whole database as a **single portable file** you can copy. It works on **every**
+Python version, including 3.14+.
 
-It is pinned at **0.11.3**: the upstream repo was archived in October 2025, so
-this is the last stable release. Two practical consequences:
+pgraph migrated here **from Kùzu** (an archived embedded graph DB that spoke
+Cypher): Kùzu's wheels were locked to Python 3.11–3.13 and its repository was
+archived in **October 2025**, which prompted the move. pgraph only ever does
+simple 1–2 hop lookups, which indexed SQLite joins over the `edges` table handle
+easily, so a native-graph engine wasn't needed.
 
-- **Python 3.11–3.13 only.** There is no Kùzu wheel for Python 3.14 yet. Use a
-  conda env or venv on a supported version.
-- **The JSONL export is the migration path.** If the engine ever needs
-  swapping (for a Kùzu successor, or SQLite + recursive CTEs), the
-  human-readable `nodes.jsonl`/`edges.jsonl` export is the format that carries
-  your memory across. See [PORTABILITY.md](PORTABILITY.md).
+**The JSONL export remains the portability format.** The human-readable
+`nodes.jsonl`/`edges.jsonl` export is what carries your memory across machines
+or storage engines. See [PORTABILITY.md](PORTABILITY.md).

@@ -2,75 +2,134 @@
 {"label": "Agent", "props": {"id": "claude-code", "name": "claude-code"}}
 {"label": "Session", "props": {"id": "273b11311afe4798841f8d1039e783fd", "agent_name": "claude-code", "started_at": "2026-06-07T13:49:45.467257", "ended_at": "2026-06-07T13:49:56.205818", "summary": "Polish pass complete; 21 tests green"}}
 {"label": "Session", "props": {"id": "b3b740d2a6ae4e20b9eb531e27336bec", "agent_name": "claude-code", "started_at": "2026-06-07T13:50:41.546105", "ended_at": "2026-06-07T13:55:31.795301", "summary": ""}}
-{"label": "Session", "props": {"id": "f481794efd1140a388d0f9276b47c67a", "agent_name": "claude-code", "started_at": "2026-06-07T14:36:31.149369", "ended_at": null, "summary": ""}}
-{"label": "Change", "props": {"id": "commit:Project_graph:6013f323ee6e1e58c44559b4eec210b883e0acdc", "kind": "commit", "path": "Project_graph", "summary": "Initial commit: pgraph \u2014 graph-based project memory for coding agents", "diff_stat": "6013f323ee6e", "ts": "2026-06-06T19:49:27"}}
-{"label": "Change", "props": {"id": "cb66908b29e843508eca348341ba03da", "kind": "create", "path": "pgraph/query.py", "summary": "add status() health-check query", "diff_stat": "", "ts": "2026-06-07T13:49:45.609957"}}
-{"label": "Change", "props": {"id": "fb9a3fd9007c48db8efb0f583e4e5135", "kind": "edit", "path": "pgraph/db.py", "summary": "add read-only cypher guard (assert_read_only)", "diff_stat": "", "ts": "2026-06-07T13:49:45.743739"}}
-{"label": "Change", "props": {"id": "3fd494a213014aaaa9ea4e3c9a5012c5", "kind": "create", "path": ".github/workflows/test.yml", "summary": "CI: pytest on py3.11-3.13", "diff_stat": "", "ts": "2026-06-07T13:49:45.888024"}}
-{"label": "Change", "props": {"id": "8cf27ecb4c5941209c098014969bd29d", "kind": "edit", "path": ".gitignore", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:50:41.583655"}}
-{"label": "Change", "props": {"id": "2353662d036a4f35b512a0dce1aa63f9", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:51:04.408880"}}
-{"label": "Change", "props": {"id": "73efd94283a2452ea24760194ed4b81f", "kind": "edit", "path": "CHANGELOG.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:51:12.398718"}}
-{"label": "Change", "props": {"id": "ae03d0860c684151bce759992892a5a8", "kind": "edit", "path": "pgraph/query.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:31.190718"}}
-{"label": "Change", "props": {"id": "5276ac48b3094cedb0db6a77fd91da0d", "kind": "edit", "path": "pgraph/hook.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:36.062738"}}
-{"label": "Change", "props": {"id": "25c64af53778420fac775111be88387f", "kind": "edit", "path": "pgraph/hook.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:44.062240"}}
-{"label": "Change", "props": {"id": "1025539888f34db59d181f4161029db6", "kind": "edit", "path": "pgraph/cli.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:51.311199"}}
-{"label": "Change", "props": {"id": "b9894c402b5b416a818ecb89436be69d", "kind": "edit", "path": "pgraph/install_hooks.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:56.395760"}}
-{"label": "Change", "props": {"id": "6f6097fcbee44818b464cc0bef6aeacb", "kind": "edit", "path": "pgraph/install_hooks.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:37:06.471068"}}
-{"label": "Change", "props": {"id": "6490ed6d0848450cb457473346c50c26", "kind": "create", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:20.662760"}}
-{"label": "Change", "props": {"id": "a87d99f090774602bd80cb3632afee40", "kind": "edit", "path": "pgraph/query.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:37.180673"}}
-{"label": "Change", "props": {"id": "9a77a872770e4637ae6102f6373bf145", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:55.769866"}}
-{"label": "Change", "props": {"id": "6b11bf49919c498d878dc512874a6ec4", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:03.619944"}}
-{"label": "Change", "props": {"id": "c8d1a94d933640e7943d122fc2ad9a3e", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:09.920502"}}
-{"label": "Change", "props": {"id": "6a1cb89978fb48de8b5ea23679533fe0", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:16.356853"}}
-{"label": "Change", "props": {"id": "cabc9ece19294414a068f5211d7cbfb8", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:21.072022"}}
-{"label": "Change", "props": {"id": "fccbeef0eb9a47588d0689ef3e535518", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:27.343858"}}
+{"label": "Session", "props": {"id": "d95dcd51a5984da39b8cd29b68335e32", "agent_name": "claude-code", "started_at": "2026-06-07T16:23:37.297368", "ended_at": null, "summary": ""}}
+{"label": "Session", "props": {"id": "f481794efd1140a388d0f9276b47c67a", "agent_name": "claude-code", "started_at": "2026-06-07T14:36:31.149369", "ended_at": "2026-06-07T14:49:51.677987", "summary": ""}}
+{"label": "Change", "props": {"id": "0861633744894d8bb2b0d5c2a0d9f6d0", "kind": "create", "path": "/Users/adarshsinha/Desktop/Spokesfan/AGENTS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:47:29.171789"}}
 {"label": "Change", "props": {"id": "0dad2e889f694041a05f40c4f000c874", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:36.736670"}}
+{"label": "Change", "props": {"id": "0dc85e5e5d604185a47011a232470944", "kind": "edit", "path": "/Users/adarshsinha/.codex/AGENTS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:28:54.239955"}}
+{"label": "Change", "props": {"id": "1025539888f34db59d181f4161029db6", "kind": "edit", "path": "pgraph/cli.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:51.311199"}}
+{"label": "Change", "props": {"id": "177d9464435c42faa772fd7a7858dfe3", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:17.938227"}}
 {"label": "Change", "props": {"id": "1a27ff8f01c645cfacdbf639184da1f3", "kind": "edit", "path": "CHANGELOG.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:42.703373"}}
+{"label": "Change", "props": {"id": "2353662d036a4f35b512a0dce1aa63f9", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:51:04.408880"}}
 {"label": "Change", "props": {"id": "2358863251314669b043d67d471a6a8f", "kind": "edit", "path": "pgraph/scan.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:07.143047"}}
-{"label": "Change", "props": {"id": "c61bd1a38ecc4f8285f6d354d8530c85", "kind": "edit", "path": "pgraph/scan.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:15.095795"}}
-{"label": "Change", "props": {"id": "e88b8170c2184c86bd674fe68c6884d8", "kind": "edit", "path": "pgraph/cli.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:23.619353"}}
-{"label": "Change", "props": {"id": "a16a00210148449d82751a42137ff385", "kind": "edit", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:31.507090"}}
+{"label": "Change", "props": {"id": "2561e9f60f4842659eb5e87ffce82022", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:47.777518"}}
+{"label": "Change", "props": {"id": "25c64af53778420fac775111be88387f", "kind": "edit", "path": "pgraph/hook.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:44.062240"}}
+{"label": "Change", "props": {"id": "3599f8f741624a549f48b6868e9f15b0", "kind": "edit", "path": "CHANGELOG.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:27:20.787336"}}
+{"label": "Change", "props": {"id": "36aeb3b799984956ac0bf5d4b1988924", "kind": "edit", "path": "docs/ARCHITECTURE.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:23:57.832626"}}
+{"label": "Change", "props": {"id": "3994b72dec8d49eabee20cfc85149d17", "kind": "edit", "path": "CONTRIBUTING.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:28:04.966006"}}
+{"label": "Change", "props": {"id": "3db50aef5ab84f638a88896f87f5c25d", "kind": "edit", "path": "/Users/adarshsinha/.codex/config.toml", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:44:50.014995"}}
+{"label": "Change", "props": {"id": "3fd494a213014aaaa9ea4e3c9a5012c5", "kind": "create", "path": ".github/workflows/test.yml", "summary": "CI: pytest on py3.11-3.13", "diff_stat": "", "ts": "2026-06-07T13:49:45.888024"}}
+{"label": "Change", "props": {"id": "42d5e04af8ce4e3bae0e9c77d8b41ed1", "kind": "edit", "path": "/Users/adarshsinha/.claude/settings.json", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:44:14.307007"}}
+{"label": "Change", "props": {"id": "48ec9b4b818748c6b4c82284707e78a9", "kind": "edit", "path": "docs/README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:24.036607"}}
+{"label": "Change", "props": {"id": "4c171ea1c6244894ad13bcd3c9456c2c", "kind": "edit", "path": "docs/MCP.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:36.443921"}}
+{"label": "Change", "props": {"id": "4ca511f0be0e42a280b96ab66652f4be", "kind": "edit", "path": "docs/PORTABILITY.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:34.711397"}}
+{"label": "Change", "props": {"id": "4dc41c1ecc5e4a2fbfa27b413e54d62e", "kind": "edit", "path": ".github/pull_request_template.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:28:13.702644"}}
+{"label": "Change", "props": {"id": "5067c35b111341bd8c22fab56ccc02f8", "kind": "edit", "path": "docs/SCHEMA.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:11.409894"}}
+{"label": "Change", "props": {"id": "5276ac48b3094cedb0db6a77fd91da0d", "kind": "edit", "path": "pgraph/hook.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:36.062738"}}
+{"label": "Change", "props": {"id": "530182dd149142fc88102ac5e884d8d5", "kind": "create", "path": "/Users/adarshsinha/Desktop/Spokesfan/CODEX_PGRAPH_SETUP.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:48:42.134400"}}
+{"label": "Change", "props": {"id": "548a5c2ec4264b76859561ba662f531d", "kind": "create", "path": "/Users/adarshsinha/.codex/AGENTS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:47:13.021583"}}
+{"label": "Change", "props": {"id": "5a8e8a6853134db9beb057ae1858b6f4", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:05.444191"}}
+{"label": "Change", "props": {"id": "5d48743c1bad47ddbc9d57e815acfd70", "kind": "edit", "path": "docs/SCHEMA.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:33.070712"}}
+{"label": "Change", "props": {"id": "6490ed6d0848450cb457473346c50c26", "kind": "create", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:20.662760"}}
+{"label": "Change", "props": {"id": "661d676643154f15bfd956db548f5004", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:37.891640"}}
+{"label": "Change", "props": {"id": "67299df8c14e4a758c78f4ba8a098da2", "kind": "edit", "path": "docs/PORTABILITY.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:40.978164"}}
+{"label": "Change", "props": {"id": "675e62b024fe4f16b682145393a6e92b", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:53.597918"}}
+{"label": "Change", "props": {"id": "6a1cb89978fb48de8b5ea23679533fe0", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:16.356853"}}
+{"label": "Change", "props": {"id": "6b11bf49919c498d878dc512874a6ec4", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:03.619944"}}
+{"label": "Change", "props": {"id": "6f6097fcbee44818b464cc0bef6aeacb", "kind": "edit", "path": "pgraph/install_hooks.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:37:06.471068"}}
+{"label": "Change", "props": {"id": "73efd94283a2452ea24760194ed4b81f", "kind": "edit", "path": "CHANGELOG.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:51:12.398718"}}
+{"label": "Change", "props": {"id": "7401e668533443f5a5f46c005449ecfe", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:02.398021"}}
+{"label": "Change", "props": {"id": "74e9713a235f455db9a09a4599192633", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:44.965232"}}
+{"label": "Change", "props": {"id": "7702df964b7f4ce8b34c3ee07bd9f6c3", "kind": "edit", "path": ".github/workflows/test.yml", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:27:45.607229"}}
+{"label": "Change", "props": {"id": "7c5a775f29d34d279b12d129aa2dbf16", "kind": "edit", "path": "/Users/adarshsinha/Desktop/Spokesfan/CODEX_PGRAPH_SETUP.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:29:09.403486"}}
+{"label": "Change", "props": {"id": "7d592518d4f8487190c6e5cf4a543ea5", "kind": "edit", "path": "docs/PORTABILITY.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:37.606832"}}
 {"label": "Change", "props": {"id": "824584130bce4b6ba9dedd79cebe7da2", "kind": "edit", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:37.388296"}}
+{"label": "Change", "props": {"id": "84e20bbbc7ea4fb3ab640caf611b6f19", "kind": "edit", "path": ".gitignore", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:28:34.788148"}}
+{"label": "Change", "props": {"id": "86bae595d44745f0bbc12e1bc6c9b189", "kind": "edit", "path": "docs/README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:30.503611"}}
+{"label": "Change", "props": {"id": "8a8aa7cb33cd4ba1b17da7e6fcff19cd", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:13.247199"}}
+{"label": "Change", "props": {"id": "8abb43493bc24eb5812ebc8eb562ae59", "kind": "edit", "path": "docs/PORTABILITY.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:29.956130"}}
+{"label": "Change", "props": {"id": "8cf27ecb4c5941209c098014969bd29d", "kind": "edit", "path": ".gitignore", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T13:50:41.583655"}}
+{"label": "Change", "props": {"id": "9143c5d4b2874570a9a48981f3e54065", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:11.171742"}}
+{"label": "Change", "props": {"id": "9528a31a6b8c41199cdd27066164531a", "kind": "create", "path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/spokesfan-pgraph.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:49:17.223966"}}
+{"label": "Change", "props": {"id": "95f4699224f34515bffc9a70166590f9", "kind": "edit", "path": "docs/ARCHITECTURE.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:23:44.429260"}}
+{"label": "Change", "props": {"id": "9a77a872770e4637ae6102f6373bf145", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:55.769866"}}
+{"label": "Change", "props": {"id": "9f6fef6ba58e4cc6a36cc6b9425060dc", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:57.408088"}}
+{"label": "Change", "props": {"id": "a115b791a0484a1c93deb2007b1ccc94", "kind": "edit", "path": "docs/SCHEMA.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:22.252476"}}
+{"label": "Change", "props": {"id": "a16a00210148449d82751a42137ff385", "kind": "edit", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:31.507090"}}
+{"label": "Change", "props": {"id": "a87d99f090774602bd80cb3632afee40", "kind": "edit", "path": "pgraph/query.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:38:37.180673"}}
+{"label": "Change", "props": {"id": "ae03d0860c684151bce759992892a5a8", "kind": "edit", "path": "pgraph/query.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:31.190718"}}
+{"label": "Change", "props": {"id": "b47c2d0940f14b949a0b1380b28c3351", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:52.461041"}}
+{"label": "Change", "props": {"id": "b9894c402b5b416a818ecb89436be69d", "kind": "edit", "path": "pgraph/install_hooks.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:36:56.395760"}}
+{"label": "Change", "props": {"id": "be21fb9477724b099d507c664bbe690d", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:42.459059"}}
+{"label": "Change", "props": {"id": "c61bd1a38ecc4f8285f6d354d8530c85", "kind": "edit", "path": "pgraph/scan.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:15.095795"}}
+{"label": "Change", "props": {"id": "c8d1a94d933640e7943d122fc2ad9a3e", "kind": "edit", "path": "docs/HOOKS.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:09.920502"}}
+{"label": "Change", "props": {"id": "cabc9ece19294414a068f5211d7cbfb8", "kind": "edit", "path": "docs/CLI.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:21.072022"}}
+{"label": "Change", "props": {"id": "cb66908b29e843508eca348341ba03da", "kind": "create", "path": "pgraph/query.py", "summary": "add status() health-check query", "diff_stat": "", "ts": "2026-06-07T13:49:45.609957"}}
+{"label": "Change", "props": {"id": "commit:Project_graph:6013f323ee6e1e58c44559b4eec210b883e0acdc", "kind": "commit", "path": "Project_graph", "summary": "Initial commit: pgraph \u2014 graph-based project memory for coding agents", "diff_stat": "6013f323ee6e", "ts": "2026-06-06T19:49:27"}}
+{"label": "Change", "props": {"id": "d3bdf81f01d64f2d9b92a21670395ab0", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:55.434725"}}
+{"label": "Change", "props": {"id": "e06139b9c54047798177165774bcba3b", "kind": "edit", "path": "docs/ARCHITECTURE.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:23:52.575275"}}
+{"label": "Change", "props": {"id": "e10dae7c637a4fb88db7546d2d7921aa", "kind": "edit", "path": "docs/DEVELOPMENT.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:08.050807"}}
+{"label": "Change", "props": {"id": "e224ae081cac4c2daf3f9c8a18cb7285", "kind": "edit", "path": "docs/SCHEMA.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:00.508597"}}
+{"label": "Change", "props": {"id": "e88b8170c2184c86bd674fe68c6884d8", "kind": "edit", "path": "pgraph/cli.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:23.619353"}}
+{"label": "Change", "props": {"id": "ef900f1b39d1487e8522ab831962f2a0", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:26:10.438100"}}
+{"label": "Change", "props": {"id": "f130b1faf81b4d1495cf26b87aa5a025", "kind": "edit", "path": "/Users/adarshsinha/Desktop/Spokesfan/CODEX_PGRAPH_SETUP.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:29:17.258814"}}
+{"label": "Change", "props": {"id": "f65b10d0946e4e539e0ad6fe05b726b3", "kind": "edit", "path": "docs/SCHEMA.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:04.572717"}}
+{"label": "Change", "props": {"id": "f67a526b307747a39b995bcba25d8bcb", "kind": "create", "path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/MEMORY.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:49:35.985840"}}
+{"label": "Change", "props": {"id": "f9dd5a56e83046569eb348aafab533bd", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:25:57.869419"}}
+{"label": "Change", "props": {"id": "fb9a3fd9007c48db8efb0f583e4e5135", "kind": "edit", "path": "pgraph/db.py", "summary": "add read-only cypher guard (assert_read_only)", "diff_stat": "", "ts": "2026-06-07T13:49:45.743739"}}
+{"label": "Change", "props": {"id": "fbadab1fb9cd41d3bf22f7413b404eb6", "kind": "edit", "path": "docs/ARCHITECTURE.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:23:37.298266"}}
+{"label": "Change", "props": {"id": "fccbeef0eb9a47588d0689ef3e535518", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:27.343858"}}
+{"label": "Change", "props": {"id": "fdf38cbb79e4485bb832806ecf355784", "kind": "create", "path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/auto-context-setup.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:49:09.302339"}}
+{"label": "Change", "props": {"id": "ff8260817db6434cab739e1d7b07e954", "kind": "edit", "path": "docs/ARCHITECTURE.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T16:24:10.397650"}}
+{"label": "File", "props": {"path": ".github/pull_request_template.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:28:13.703052"}}
+{"label": "File", "props": {"path": ".github/workflows/test.yml", "lang": "yaml", "last_seen_at": "2026-06-07T16:27:45.607722"}}
+{"label": "File", "props": {"path": ".gitignore", "lang": "", "last_seen_at": "2026-06-07T16:28:34.788543"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/MEMORY.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:49:35.997338"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/auto-context-setup.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:49:09.312733"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.claude/projects/-Users-adarshsinha-Desktop-Project-graph/memory/spokesfan-pgraph.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:49:17.234837"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.claude/settings.json", "lang": "json", "last_seen_at": "2026-06-07T14:44:14.322520"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.codex/AGENTS.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:28:54.240275"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/.codex/config.toml", "lang": "toml", "last_seen_at": "2026-06-07T14:44:50.028275"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/Desktop/Spokesfan/AGENTS.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:47:29.189203"}}
+{"label": "File", "props": {"path": "/Users/adarshsinha/Desktop/Spokesfan/CODEX_PGRAPH_SETUP.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:29:17.259328"}}
+{"label": "File", "props": {"path": "CHANGELOG.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:27:20.787735"}}
+{"label": "File", "props": {"path": "CONTRIBUTING.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:28:04.966380"}}
 {"label": "File", "props": {"path": "LICENSE", "lang": "", "last_seen_at": "2026-06-07T13:47:48.133129"}}
-{"label": "File", "props": {"path": "CHANGELOG.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:42.717997"}}
-{"label": "File", "props": {"path": "pyproject.toml", "lang": "toml", "last_seen_at": "2026-06-07T13:47:48.156831"}}
-{"label": "File", "props": {"path": "README.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:36.747405"}}
-{"label": "File", "props": {"path": ".gitignore", "lang": "", "last_seen_at": "2026-06-07T13:50:41.591483"}}
-{"label": "File", "props": {"path": "CONTRIBUTING.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.180761"}}
+{"label": "File", "props": {"path": "README.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:26:17.938612"}}
+{"label": "File", "props": {"path": "docs/ARCHITECTURE.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:24:10.398093"}}
+{"label": "File", "props": {"path": "docs/CLI.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:26:53.598347"}}
+{"label": "File", "props": {"path": "docs/CONTEXT_PACK.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.404901"}}
+{"label": "File", "props": {"path": "docs/DEVELOPMENT.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:25:13.247636"}}
+{"label": "File", "props": {"path": "docs/HOOKS.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:09.931343"}}
+{"label": "File", "props": {"path": "docs/MCP.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:26:36.444331"}}
+{"label": "File", "props": {"path": "docs/PORTABILITY.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:24:40.978926"}}
+{"label": "File", "props": {"path": "docs/README.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:26:30.504029"}}
+{"label": "File", "props": {"path": "docs/SCHEMA.md", "lang": "markdown", "last_seen_at": "2026-06-07T16:24:33.071148"}}
 {"label": "File", "props": {"path": "pgraph.egg-info/PKG-INFO", "lang": "", "last_seen_at": "2026-06-07T13:47:48.188906"}}
 {"label": "File", "props": {"path": "pgraph.egg-info/SOURCES.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.196863"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/dependency_links.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.227725"}}
 {"label": "File", "props": {"path": "pgraph.egg-info/entry_points.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.204858"}}
 {"label": "File", "props": {"path": "pgraph.egg-info/requires.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.211782"}}
 {"label": "File", "props": {"path": "pgraph.egg-info/top_level.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.219812"}}
-{"label": "File", "props": {"path": "pgraph.egg-info/dependency_links.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.227725"}}
-{"label": "File", "props": {"path": "pgraph/db.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.065179"}}
-{"label": "File", "props": {"path": "pgraph/install_hooks.py", "lang": "python", "last_seen_at": "2026-06-07T14:37:06.484041"}}
-{"label": "File", "props": {"path": "pgraph/query.py", "lang": "python", "last_seen_at": "2026-06-07T14:38:37.191517"}}
-{"label": "File", "props": {"path": "pgraph/hook.py", "lang": "python", "last_seen_at": "2026-06-07T14:36:44.073529"}}
 {"label": "File", "props": {"path": "pgraph/__init__.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.267844"}}
-{"label": "File", "props": {"path": "pgraph/export.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.275819"}}
 {"label": "File", "props": {"path": "pgraph/capture.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.283782"}}
 {"label": "File", "props": {"path": "pgraph/cli.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:23.630352"}}
-{"label": "File", "props": {"path": "pgraph/scan.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:15.106755"}}
+{"label": "File", "props": {"path": "pgraph/db.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.065179"}}
+{"label": "File", "props": {"path": "pgraph/export.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.275819"}}
+{"label": "File", "props": {"path": "pgraph/hook.py", "lang": "python", "last_seen_at": "2026-06-07T14:36:44.073529"}}
+{"label": "File", "props": {"path": "pgraph/install_hooks.py", "lang": "python", "last_seen_at": "2026-06-07T14:37:06.484041"}}
 {"label": "File", "props": {"path": "pgraph/mcp_server.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.083089"}}
+{"label": "File", "props": {"path": "pgraph/query.py", "lang": "python", "last_seen_at": "2026-06-07T14:38:37.191517"}}
+{"label": "File", "props": {"path": "pgraph/scan.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:15.106755"}}
 {"label": "File", "props": {"path": "pgraph/schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.315807"}}
+{"label": "File", "props": {"path": "pyproject.toml", "lang": "toml", "last_seen_at": "2026-06-07T13:47:48.156831"}}
 {"label": "File", "props": {"path": "tests/conftest.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.323930"}}
-{"label": "File", "props": {"path": "tests/test_status_and_guard.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.331801"}}
-{"label": "File", "props": {"path": "tests/test_export_roundtrip.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.339911"}}
-{"label": "File", "props": {"path": "tests/test_schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.347786"}}
 {"label": "File", "props": {"path": "tests/test_capture.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.355783"}}
+{"label": "File", "props": {"path": "tests/test_export_roundtrip.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.339911"}}
 {"label": "File", "props": {"path": "tests/test_query.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.363847"}}
-{"label": "File", "props": {"path": "docs/ARCHITECTURE.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.371950"}}
-{"label": "File", "props": {"path": "docs/MCP.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.379812"}}
-{"label": "File", "props": {"path": "docs/CLI.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:21.084060"}}
-{"label": "File", "props": {"path": "docs/SCHEMA.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.395924"}}
-{"label": "File", "props": {"path": "docs/CONTEXT_PACK.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.404901"}}
-{"label": "File", "props": {"path": "docs/README.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.412828"}}
-{"label": "File", "props": {"path": "docs/HOOKS.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:09.931343"}}
-{"label": "File", "props": {"path": "docs/DEVELOPMENT.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.428894"}}
-{"label": "File", "props": {"path": "docs/PORTABILITY.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.436967"}}
-{"label": "File", "props": {"path": ".github/workflows/test.yml", "lang": "yaml", "last_seen_at": "2026-06-07T13:49:45.898370"}}
+{"label": "File", "props": {"path": "tests/test_schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.347786"}}
 {"label": "File", "props": {"path": "tests/test_session_brief.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:37.403085"}}
+{"label": "File", "props": {"path": "tests/test_status_and_guard.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.331801"}}
 {"label": "Decision", "props": {"id": "2b6cd4c0f7f44482939672aab3813121", "title": "cypher escape hatch is read-only", "body": "An arbitrary-query tool that allows writes lets an agent corrupt the graph outside the validated capture path. Guard with a keyword check; mutations go through log_change/log_decision.", "ts": "2026-06-07T13:49:46.041364"}}
 {"label": "Skill", "props": {"name": "deep-research"}}
 {"label": "Skill", "props": {"name": "update-config"}}

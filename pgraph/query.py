@@ -11,10 +11,15 @@ from __future__ import annotations
 from typing import Any
 
 from .db import Graph
+from .schema import NODE_LABELS, REL_TYPES
 
 
 def _iso(v: Any) -> Any:
-    """Render datetimes as ISO strings so results are JSON-serializable."""
+    """Render datetimes as ISO strings so results are JSON-serializable.
+
+    Timestamps are already stored as ISO strings, so this is a safety net for
+    any stray datetime; it's a no-op on the common path.
+    """
     if hasattr(v, "isoformat"):
         return v.isoformat()
     return v
@@ -24,102 +29,58 @@ def _clean(row: dict[str, Any]) -> dict[str, Any]:
     return {k: _iso(v) for k, v in row.items()}
 
 
+def _pick(node: dict[str, Any], *keys: str) -> dict[str, Any]:
+    """Project selected props out of a node, ISO-cleaning values."""
+    return {k: _iso(node.get(k)) for k in keys}
+
+
 def recent_changes(
     g: Graph, limit: int = 20, since: str | None = None, path: str | None = None
 ) -> list[dict[str, Any]]:
     """Most recent changes, newest first, optionally filtered by file or time."""
-    where = []
-    params: dict[str, Any] = {"limit": limit}
+    where: list[tuple[str, str, Any]] = []
     if path:
-        where.append("c.path = $path")
-        params["path"] = path
+        where.append(("path", "=", path))
     if since:
-        where.append("c.ts >= timestamp($since)")
-        params["since"] = since
-    clause = ("WHERE " + " AND ".join(where)) if where else ""
-    rows = g.all(
-        f"""MATCH (c:Change) {clause}
-            RETURN c.id AS id, c.kind AS kind, c.path AS path,
-                   c.summary AS summary, c.diff_stat AS diff_stat, c.ts AS ts
-            ORDER BY c.ts DESC LIMIT $limit""",
-        params,
-    )
-    return [_clean(r) for r in rows]
+        where.append(("ts", ">=", since))
+    rows = g.match_nodes("Change", where=where, order_by="ts", desc=True, limit=limit)
+    return [_pick(r, "id", "kind", "path", "summary", "diff_stat", "ts") for r in rows]
 
 
 def file_history(g: Graph, path: str) -> dict[str, Any]:
     """All changes touching *path* plus the decisions about it — the full story of one file."""
-    changes = g.all(
-        """MATCH (c:Change)-[:AFFECTS]->(f:File {path:$path})
-           RETURN c.id AS id, c.kind AS kind, c.summary AS summary,
-                  c.diff_stat AS diff_stat, c.ts AS ts
-           ORDER BY c.ts DESC""",
-        {"path": path},
-    )
-    decisions = g.all(
-        """MATCH (d:Decision)-[:ABOUT]->(f:File {path:$path})
-           RETURN d.id AS id, d.title AS title, d.body AS body, d.ts AS ts
-           ORDER BY d.ts DESC""",
-        {"path": path},
-    )
-    return {
-        "path": path,
-        "changes": [_clean(r) for r in changes],
-        "decisions": [_clean(r) for r in decisions],
-    }
+    change_nodes = g.in_neighbors("AFFECTS", "File", path, "Change", order_by="ts", desc=True)
+    changes = [_pick(c, "id", "kind", "summary", "diff_stat", "ts") for c in change_nodes]
+    decision_nodes = g.in_neighbors("ABOUT", "File", path, "Decision", order_by="ts", desc=True)
+    decisions = [_pick(d, "id", "title", "body", "ts") for d in decision_nodes]
+    return {"path": path, "changes": changes, "decisions": decisions}
 
 
 def decisions_for(g: Graph, change_id: str) -> list[dict[str, Any]]:
     """Decisions that motivated a given change."""
-    rows = g.all(
-        """MATCH (d:Decision)-[:MOTIVATES]->(c:Change {id:$cid})
-           RETURN d.id AS id, d.title AS title, d.body AS body, d.ts AS ts
-           ORDER BY d.ts DESC""",
-        {"cid": change_id},
-    )
-    return [_clean(r) for r in rows]
+    nodes = g.in_neighbors("MOTIVATES", "Change", change_id, "Decision", order_by="ts", desc=True)
+    return [_pick(d, "id", "title", "body", "ts") for d in nodes]
 
 
 def session_summary(g: Graph, session_id: str | None = None) -> dict[str, Any]:
     """Summary of one session (or the latest): metadata, its changes and skills."""
     if session_id:
-        sess = g.one(
-            """MATCH (s:Session {id:$id})
-               RETURN s.id AS id, s.agent_name AS agent, s.started_at AS started_at,
-                      s.ended_at AS ended_at, s.summary AS summary""",
-            {"id": session_id},
-        )
+        sess = g.get_node("Session", session_id)
     else:
-        sess = g.one(
-            """MATCH (s:Session)
-               RETURN s.id AS id, s.agent_name AS agent, s.started_at AS started_at,
-                      s.ended_at AS ended_at, s.summary AS summary
-               ORDER BY s.started_at DESC LIMIT 1"""
-        )
+        rows = g.match_nodes("Session", order_by="started_at", desc=True, limit=1)
+        sess = rows[0] if rows else None
     if not sess:
         return {}
     sid = sess["id"]
-    changes = g.all(
-        """MATCH (c:Change)-[:IN_SESSION]->(s:Session {id:$sid})
-           RETURN c.id AS id, c.kind AS kind, c.path AS path, c.summary AS summary, c.ts AS ts
-           ORDER BY c.ts DESC""",
-        {"sid": sid},
-    )
-    skills = g.all(
-        "MATCH (s:Session {id:$sid})-[:USED_SKILL]->(sk:Skill) RETURN sk.name AS name",
-        {"sid": sid},
-    )
-    out = _clean(sess)
-    out["changes"] = [_clean(r) for r in changes]
-    out["skills"] = [r["name"] for r in skills]
+    change_nodes = g.in_neighbors("IN_SESSION", "Session", sid, "Change", order_by="ts", desc=True)
+    changes = [_pick(c, "id", "kind", "path", "summary", "ts") for c in change_nodes]
+    skills = g.out_neighbors("USED_SKILL", "Session", sid, "Skill")
+    out = _pick(sess, "id", "agent_name", "started_at", "ended_at", "summary")
+    # Preserve the historical 'agent' alias used by callers/tests.
+    out["agent"] = out.pop("agent_name")
+    out["changes"] = changes
+    out["skills"] = [s["name"] for s in skills]
     return out
-
-
-_NODE_LABELS = ["Project", "Agent", "Session", "Change", "File", "Decision", "Repo", "Skill"]
-_REL_TYPES = [
-    "IN_PROJECT", "BY_AGENT", "IN_SESSION", "AFFECTS",
-    "MOTIVATES", "ABOUT", "USED_SKILL", "IN_REPO",
-]
 
 
 def status(g: Graph) -> dict[str, Any]:
@@ -130,30 +91,31 @@ def status(g: Graph) -> dict[str, Any]:
     """
     nodes: dict[str, int] = {}
     total_nodes = 0
-    for label in _NODE_LABELS:
-        row = g.one(f"MATCH (n:{label}) RETURN count(n) AS c")
-        n = int(row["c"]) if row else 0
+    for label in NODE_LABELS:
+        n = g.count_nodes(label)
         nodes[label] = n
         total_nodes += n
 
     edges: dict[str, int] = {}
     total_edges = 0
-    for rel in _REL_TYPES:
-        row = g.one(f"MATCH ()-[r:{rel}]->() RETURN count(r) AS c")
-        n = int(row["c"]) if row else 0
+    for rel in REL_TYPES:
+        n = g.count_edges(rel)
         edges[rel] = n
         total_edges += n
 
-    open_sess = g.one(
-        """MATCH (s:Session) WHERE s.ended_at IS NULL
-           RETURN s.id AS id, s.agent_name AS agent, s.started_at AS started_at
-           ORDER BY s.started_at DESC LIMIT 1"""
+    open_rows = g.match_nodes(
+        "Session", where=[("ended_at", "IS", None)],
+        order_by="started_at", desc=True, limit=1,
     )
+    open_sess = None
+    if open_rows:
+        open_sess = _pick(open_rows[0], "id", "agent_name", "started_at")
+        open_sess["agent"] = open_sess.pop("agent_name")
     return {
         "nodes": nodes,
         "edges": edges,
         "totals": {"nodes": total_nodes, "edges": total_edges},
-        "open_session": _clean(open_sess) if open_sess else None,
+        "open_session": open_sess,
     }
 
 
@@ -189,14 +151,10 @@ def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
             lines.append(f"- `{c.get('path', '?')}` — {c.get('kind', '?')}{(': ' + note) if note else ''}")
         lines.append("")
 
-    decisions = g.all(
-        """MATCH (d:Decision)
-           RETURN d.title AS title, d.body AS body, d.ts AS ts
-           ORDER BY d.ts DESC LIMIT 5"""
-    )
-    if decisions:
+    decision_nodes = g.match_nodes("Decision", order_by="ts", desc=True, limit=5)
+    if decision_nodes:
         lines.append("**Recent decisions (the *why*):**")
-        for d in decisions:
+        for d in decision_nodes:
             body = (d.get("body") or "").strip().replace("\n", " ")
             if len(body) > 160:
                 body = body[:157] + "..."

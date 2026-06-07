@@ -28,11 +28,11 @@ def test_status_counts_nodes_edges_and_open_session(graph):
 @pytest.mark.parametrize(
     "bad",
     [
-        "MATCH (n) DETACH DELETE n",
-        "CREATE (n:Change {id:'x'})",
-        "MATCH (n:File) SET n.lang='python'",
-        "MERGE (a:Agent {id:'x'})",
-        "match (n) remove n.lang",
+        "DELETE FROM nodes",
+        "INSERT INTO nodes VALUES ('x','y','{}')",
+        "UPDATE nodes SET props='{}' WHERE label='File'",
+        "DROP TABLE edges",
+        "pragma journal_mode=delete",
     ],
 )
 def test_assert_read_only_rejects_writes(bad):
@@ -43,9 +43,9 @@ def test_assert_read_only_rejects_writes(bad):
 @pytest.mark.parametrize(
     "ok",
     [
-        "MATCH (c:Change) RETURN c.path",
-        "MATCH (d:Decision)-[:MOTIVATES]->(c:Change) RETURN d.title, c.summary",
-        "MATCH (n:File) WHERE n.lang = 'python' RETURN n.path ORDER BY n.path",
+        "SELECT label, pk FROM nodes",
+        "SELECT json_extract(props, '$.path') AS path FROM nodes WHERE label='Change'",
+        "SELECT rel, src_pk, dst_pk FROM edges ORDER BY rel",
     ],
 )
 def test_assert_read_only_allows_reads(ok):

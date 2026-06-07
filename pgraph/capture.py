@@ -27,56 +27,45 @@ def lang_for(path: str) -> str:
 # -- files -----------------------------------------------------------------
 def upsert_file(g: Graph, path: str) -> None:
     """Ensure a File node exists for *path*, refreshing its last_seen_at."""
-    g.run(
-        """MERGE (f:File {path:$path})
-           ON CREATE SET f.lang=$lang, f.last_seen_at=$ts
-           ON MATCH SET f.last_seen_at=$ts""",
-        {"path": path, "lang": lang_for(path), "ts": now()},
-    )
+    if g.get_node("File", path) is None:
+        g.add_node("File", path, {"path": path, "lang": lang_for(path), "last_seen_at": now()})
+    else:
+        g.set_node_props("File", path, {"last_seen_at": now()})
 
 
 # -- sessions --------------------------------------------------------------
 def start_session(g: Graph, agent: str, summary: str = "") -> str:
     """Open a work session, link it to the project and agent, return its id."""
     sid = new_id()
-    g.run(
-        "CREATE (s:Session {id:$id, agent_name:$agent, started_at:$ts, ended_at:NULL, summary:$summary})",
-        {"id": sid, "agent": agent, "ts": now(), "summary": summary},
+    g.add_node(
+        "Session",
+        sid,
+        {"id": sid, "agent_name": agent, "started_at": now(), "ended_at": None, "summary": summary},
     )
-    proj = g.one("MATCH (p:Project) RETURN p.id AS id LIMIT 1")
+    proj = g.match_nodes("Project", limit=1)
     if proj:
-        g.run(
-            "MATCH (s:Session {id:$sid}),(p:Project {id:$pid}) CREATE (s)-[:IN_PROJECT]->(p)",
-            {"sid": sid, "pid": proj["id"]},
-        )
-    g.run("MERGE (a:Agent {id:$id, name:$name})", {"id": agent, "name": agent})
-    g.run(
-        "MATCH (s:Session {id:$sid}),(a:Agent {id:$aid}) CREATE (s)-[:BY_AGENT]->(a)",
-        {"sid": sid, "aid": agent},
-    )
+        g.add_edge("IN_PROJECT", "Session", sid, "Project", proj[0]["id"])
+    if g.get_node("Agent", agent) is None:
+        g.add_node("Agent", agent, {"id": agent, "name": agent})
+    g.add_edge("BY_AGENT", "Session", sid, "Agent", agent)
     return sid
 
 
 def end_session(g: Graph, session_id: str, summary: str = "") -> None:
     """Close a session, stamping ended_at and (optionally) a summary."""
+    updates = {"ended_at": now()}
     if summary:
-        g.run(
-            "MATCH (s:Session {id:$id}) SET s.ended_at=$ts, s.summary=$summary",
-            {"id": session_id, "ts": now(), "summary": summary},
-        )
-    else:
-        g.run(
-            "MATCH (s:Session {id:$id}) SET s.ended_at=$ts",
-            {"id": session_id, "ts": now()},
-        )
+        updates["summary"] = summary
+    g.set_node_props("Session", session_id, updates)
 
 
 def latest_open_session(g: Graph) -> str | None:
     """Most recently started session that hasn't been ended yet (for hooks)."""
-    row = g.one(
-        "MATCH (s:Session) WHERE s.ended_at IS NULL RETURN s.id AS id ORDER BY s.started_at DESC LIMIT 1"
+    rows = g.match_nodes(
+        "Session", where=[("ended_at", "IS", None)],
+        order_by="started_at", desc=True, limit=1,
     )
-    return row["id"] if row else None
+    return rows[0]["id"] if rows else None
 
 
 # -- changes ---------------------------------------------------------------
@@ -93,22 +82,16 @@ def log_change(
     if kind not in VALID_CHANGE_KINDS:
         raise ValueError(f"kind must be one of {sorted(VALID_CHANGE_KINDS)}, got {kind!r}")
     cid = new_id()
-    g.run(
-        """CREATE (c:Change {id:$id, kind:$kind, path:$path, summary:$summary,
-                             diff_stat:$diff, ts:$ts})""",
+    g.add_node(
+        "Change",
+        cid,
         {"id": cid, "kind": kind, "path": path, "summary": summary,
-         "diff": diff_stat, "ts": ts or now()},
+         "diff_stat": diff_stat, "ts": ts or now()},
     )
     upsert_file(g, path)
-    g.run(
-        "MATCH (c:Change {id:$cid}),(f:File {path:$path}) CREATE (c)-[:AFFECTS]->(f)",
-        {"cid": cid, "path": path},
-    )
+    g.add_edge("AFFECTS", "Change", cid, "File", path)
     if session_id:
-        g.run(
-            "MATCH (c:Change {id:$cid}),(s:Session {id:$sid}) CREATE (c)-[:IN_SESSION]->(s)",
-            {"cid": cid, "sid": session_id},
-        )
+        g.add_edge("IN_SESSION", "Change", cid, "Session", session_id)
     return cid
 
 
@@ -122,34 +105,18 @@ def log_decision(
 ) -> str:
     """Record a manual 'why' note, optionally linking the changes/files it explains."""
     did = new_id()
-    g.run(
-        "CREATE (d:Decision {id:$id, title:$title, body:$body, ts:$ts})",
-        {"id": did, "title": title, "body": body, "ts": now()},
-    )
+    g.add_node("Decision", did, {"id": did, "title": title, "body": body, "ts": now()})
     for cid in motivates_change_ids or []:
-        g.run(
-            "MATCH (d:Decision {id:$did}),(c:Change {id:$cid}) CREATE (d)-[:MOTIVATES]->(c)",
-            {"did": did, "cid": cid},
-        )
+        g.add_edge("MOTIVATES", "Decision", did, "Change", cid)
     for path in about_paths or []:
         upsert_file(g, path)
-        g.run(
-            "MATCH (d:Decision {id:$did}),(f:File {path:$path}) CREATE (d)-[:ABOUT]->(f)",
-            {"did": did, "path": path},
-        )
+        g.add_edge("ABOUT", "Decision", did, "File", path)
     return did
 
 
 # -- skills ----------------------------------------------------------------
 def record_skill_use(g: Graph, session_id: str, skill: str) -> None:
-    g.run("MERGE (sk:Skill {name:$name})", {"name": skill})
-    # Avoid duplicate edges for repeated use within a session.
-    existing = g.one(
-        "MATCH (s:Session {id:$sid})-[:USED_SKILL]->(sk:Skill {name:$name}) RETURN sk.name AS n",
-        {"sid": session_id, "name": skill},
-    )
-    if not existing:
-        g.run(
-            "MATCH (s:Session {id:$sid}),(sk:Skill {name:$name}) CREATE (s)-[:USED_SKILL]->(sk)",
-            {"sid": session_id, "name": skill},
-        )
+    if g.get_node("Skill", skill) is None:
+        g.add_node("Skill", skill, {"name": skill})
+    # add_edge is deduped, so repeated use within a session adds one edge.
+    g.add_edge("USED_SKILL", "Session", session_id, "Skill", skill)

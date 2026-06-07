@@ -115,15 +115,18 @@ def status() -> dict[str, Any]:
 
 
 @mcp.tool()
-def cypher(query_text: str) -> list[dict[str, Any]]:
-    """Run an arbitrary read-only Cypher query against the project graph.
+def sql(query_text: str) -> list[dict[str, Any]]:
+    """Run an arbitrary read-only SQL query against the project graph.
 
-    Write statements (CREATE, MERGE, SET, DELETE, …) are rejected — use the
-    dedicated tools (log_change, log_decision, …) to mutate the graph.
+    The store is two tables: nodes(label, pk, props) and
+    edges(rel, src_label, src_pk, dst_label, dst_pk), where props is a JSON blob
+    (query fields via json_extract(props, '$.field')). Write statements
+    (INSERT, UPDATE, DELETE, …) are rejected — use the dedicated tools
+    (log_change, log_decision, …) to mutate the graph.
     """
     assert_read_only(query_text)
     with _open() as g:
-        return [{k: str(v) for k, v in r.items()} for r in g.all(query_text)]
+        return [{k: str(v) for k, v in r.items()} for r in g.sql(query_text)]
 
 
 def main() -> None:

@@ -32,7 +32,7 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `export` | Dump the graph to git-diffable JSONL. |
 | `import` | Rebuild a graph from a JSONL export. |
 | `status` | Health summary: node/edge counts + any open session. |
-| `cypher` | Run an arbitrary **read-only** Cypher query (escape hatch). |
+| `sql` | Run an arbitrary **read-only** SQL query (escape hatch). |
 | `install-hooks` | Wire auto-capture into `.claude/settings.json`. |
 
 There are also three hidden commands — `hook-session-start`,
@@ -119,13 +119,19 @@ pgraph status
 Prints per-label node counts, per-type edge counts, totals, and the currently
 open session (if any). A cheap sanity check after `init`/`scan`/`ingest-git`.
 
-### `cypher`
+### `sql`
 ```bash
-pgraph cypher "MATCH (c:Change) RETURN c.path, c.summary ORDER BY c.ts DESC LIMIT 5"
+pgraph sql "SELECT json_extract(props,'\$.path') AS path,
+                   json_extract(props,'\$.summary') AS summary
+            FROM nodes WHERE label='Change'
+            ORDER BY json_extract(props,'\$.ts') DESC LIMIT 5"
 ```
-Read-only escape hatch. Write statements (`CREATE`, `MERGE`, `SET`, `DELETE`,
-`REMOVE`, `DROP`, …) are **rejected** — use the dedicated commands to mutate
-the graph. Values are stringified for safe JSON output.
+Read-only escape hatch over the two storage tables — `nodes(label, pk, props)`
+(props is JSON; use `json_extract(props, '$.field')`) and
+`edges(rel, src_label, src_pk, dst_label, dst_pk)`. Write statements (`INSERT`,
+`UPDATE`, `DELETE`, `DROP`, …) are **rejected**, and the query runs on a
+read-only connection as a hard backstop. Values are stringified for safe JSON
+output.
 
 ### `install-hooks`
 ```bash
