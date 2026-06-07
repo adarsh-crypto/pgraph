@@ -63,10 +63,10 @@ identical code paths, so there is exactly one place a behaviour can be wrong.
 | Module | Responsibility |
 |--------|----------------|
 | [`__init__.py`](../pgraph/__init__.py) | Version + the `.pgraph/`, `graph`, `export` path constants. |
-| [`db.py`](../pgraph/db.py) | Locate the project root, open the SQLite file (WAL mode), and expose a typed `Graph` handle over the `nodes`/`edges` tables: `add_node`/`get_node`/`set_node_props`/`match_nodes`/`count_nodes`, `add_edge`/`has_edge`/`count_edges`/`out_neighbors`/`in_neighbors`/`all_edges`, plus a read-only `sql()` passthrough. Props are stored as a JSON blob and returned as plain dicts. |
+| [`db.py`](../pgraph/db.py) | Locate the project root, open the SQLite file (WAL mode + busy-timeout for concurrent agents), and expose a typed `Graph` handle over the `nodes`/`edges` tables: `add_node`/`get_node`/`set_node_props`/`match_nodes`/`count_nodes`, `add_edge`/`has_edge`/`count_edges`/`out_neighbors`/`in_neighbors`/`all_edges`, FTS5-backed `search`/`reindex`, plus a read-only `sql()` passthrough. Props are stored as a JSON blob and returned as plain dicts. |
 | [`schema.py`](../pgraph/schema.py) | The **label registry**: `NODE_LABELS`, `REL_SPECS` (`(rel, FROM, TO)` tuples), and `REL_TYPES`. `init()` calls `Graph.init_schema()` (creates the two tables + edge indexes) then ensures one `Project` node; re-running it is safe and idempotent. Also exposes `now()` and `new_id()`. |
 | [`capture.py`](../pgraph/capture.py) | The **write side**: sessions, changes, decisions, skills, files, and the edges between them. |
-| [`query.py`](../pgraph/query.py) | The **read side**: `recent_changes`, `file_history`, `decisions_for`, `session_summary`, and the headline `context_pack`. |
+| [`query.py`](../pgraph/query.py) | The **read side**: `recent_changes`, `file_history`, `decisions_for`, `session_summary`, full-text `search`, and the headline `context_pack`. |
 | [`scan.py`](../pgraph/scan.py) | Populate `File`/`Repo` nodes from the folder tree and backfill git commit history. |
 | [`export.py`](../pgraph/export.py) | Dump the graph to git-diffable JSONL and re-import it — the portability guarantee. |
 | [`mcp_server.py`](../pgraph/mcp_server.py) | Expose the capture/query functions as MCP tools over stdio. |

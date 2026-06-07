@@ -34,6 +34,7 @@ hits a "run init first" wall.
 | `recent_changes` | `(limit=20, since="", path="")` → list | Targeted recent history. |
 | `file_history` | `(path)` → dict | All changes + decisions for one file. |
 | `context_pack` | `(paths=None, budget=4000)` → dict | **The token-saver** — compact bundle for the files you're about to touch. |
+| `search` | `(term, labels=None, limit=20)` → list | Full-text search (BM25) of decisions/changes/files — find the *why* by keyword. |
 | `status` | `()` → dict | Node/edge counts + any open session. |
 | `sql` | `(query_text)` → list | Arbitrary **read-only** SQL over the nodes/edges tables (writes rejected). |
 

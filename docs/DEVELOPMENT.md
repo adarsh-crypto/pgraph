@@ -19,7 +19,7 @@ python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
 pytest -q
 ```
 
-The suite (26 tests) covers:
+The suite (36 tests) covers:
 
 | File | What it verifies |
 |------|------------------|
@@ -29,6 +29,7 @@ The suite (26 tests) covers:
 | `tests/test_export_roundtrip.py` | export → wipe → import → identical. |
 | `tests/test_status_and_guard.py` | `status()` and the read-only `sql` guard. |
 | `tests/test_session_brief.py` | The `SessionStart` brief, `scan --exclude`, and `SessionStart` hook install. |
+| `tests/test_search.py` | FTS5 search, BM25 ranking, label filter, fallback, `busy_timeout`. |
 
 Fixtures live in `tests/conftest.py` (`graph` and `root`).
 

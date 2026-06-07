@@ -56,6 +56,16 @@ def file_history(g: Graph, path: str) -> dict[str, Any]:
     return {"path": path, "changes": changes, "decisions": decisions}
 
 
+def search(g: Graph, term: str, labels: list[str] | None = None, limit: int = 20) -> list[dict[str, Any]]:
+    """Full-text search across decisions, changes, files, … best matches first.
+
+    Relevance-ranked (BM25) when the SQLite build has FTS5; otherwise a
+    recency-ordered substring fallback. Returns each hit's props (ISO-cleaned)
+    with its node label under ``_label``.
+    """
+    return [_clean(hit) for hit in g.search(term, labels=labels, limit=limit)]
+
+
 def decisions_for(g: Graph, change_id: str) -> list[dict[str, Any]]:
     """Decisions that motivated a given change."""
     nodes = g.in_neighbors("MOTIVATES", "Change", change_id, "Decision", order_by="ts", desc=True)

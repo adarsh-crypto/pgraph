@@ -86,6 +86,16 @@ the `edges` table.
   `commit:<repo-name>:<sha>`, which makes `pgraph ingest-git` idempotent — a
   re-run skips commits already present.
 
+## Full-text search index
+
+Alongside `nodes`/`edges`, an FTS5 virtual table `node_fts(label, pk, text)`
+indexes the human-meaningful text of each node (decision title + body, change
+summary, file path, repo name). It's kept in sync as nodes are written and
+powers `pgraph search` / the `search` MCP tool with BM25 relevance ranking. FTS5
+is feature-detected at init; if a SQLite build lacks it, search degrades to a
+substring scan and the table is simply absent. The FTS index is derived data —
+it is **not** part of the JSONL export and is rebuilt on `import`.
+
 ## Example SQL
 
 These run via `pgraph sql '<query>'` or the MCP `sql` tool, and are
