@@ -8,10 +8,47 @@ explain them) instead of re-reading a whole markdown log.
 
 from __future__ import annotations
 
+import datetime as _dt
+import json
 from typing import Any
 
 from .db import Graph
 from .schema import NODE_LABELS, REL_TYPES
+
+# How much each change kind is worth when ranking what to surface. Decisions are
+# scored separately (they're the scarce, high-value "why"); among changes, a
+# human-authored commit/create outranks an auto-captured edit.
+_KIND_WEIGHT = {"commit": 1.6, "create": 1.3, "delete": 1.2, "edit": 1.0}
+
+# Recency half-life in days: a change this many days older than the newest one
+# in the candidate set is worth half as much. Decay is computed relative to the
+# newest timestamp in the set (not wall-clock), so it's deterministic.
+_HALF_LIFE_DAYS = 30.0
+
+
+def _parse_ts(v: Any) -> _dt.datetime | None:
+    if isinstance(v, _dt.datetime):
+        return v
+    if isinstance(v, str):
+        try:
+            return _dt.datetime.fromisoformat(v)
+        except ValueError:
+            return None
+    return None
+
+
+def _recency_factor(ts: Any, newest: _dt.datetime | None) -> float:
+    """Exponential-decay weight in (0, 1], 1.0 for the newest item."""
+    t = _parse_ts(ts)
+    if t is None or newest is None:
+        return 1.0
+    age_days = max(0.0, (newest - t).total_seconds() / 86400.0)
+    return 0.5 ** (age_days / _HALF_LIFE_DAYS)
+
+
+def _cost(obj: Any) -> int:
+    """Character cost of an object once serialized — a cheap token proxy."""
+    return len(json.dumps(obj, default=str))
 
 
 def _iso(v: Any) -> Any:
@@ -190,15 +227,19 @@ def context_pack(
     This is the headline retrieval the whole project exists for: instead of an
     agent re-reading a growing log, it asks for context on a handful of paths
     (or, with no paths, the project's recent activity) and gets back only the
-    most recent, relevant changes and decisions — trimmed to a rough character
-    *budget* (a cheap proxy for tokens).
+    most relevant changes and decisions — trimmed to a rough character *budget*
+    (a cheap proxy for tokens).
+
+    Ranking blends **recency** (exponential decay) with **importance** (change
+    kind; decisions weighted highest), and duplicate edits to the same file with
+    the same summary are collapsed so the budget isn't spent on repetition.
     """
     pack: dict[str, Any] = {"files": [], "recent": [], "open_questions": []}
     used = 0
 
-    def room(obj: dict) -> bool:
+    def room(obj: Any) -> bool:
         nonlocal used
-        cost = sum(len(str(v)) for v in obj.values())
+        cost = _cost(obj)
         if used + cost > budget:
             return False
         used += cost
@@ -209,13 +250,16 @@ def context_pack(
             hist = file_history(g, p)
             entry = {
                 "path": p,
-                "changes": hist["changes"][:5],
+                "changes": _dedupe_changes(hist["changes"])[:5],
                 "decisions": hist["decisions"][:3],
             }
-            if room({"_": entry}):
+            if room(entry):
                 pack["files"].append(entry)
     else:
-        for c in recent_changes(g, limit=15):
+        ranked = _rank_changes(_dedupe_changes(recent_changes(g, limit=50)))
+        for c in ranked:
+            if len(pack["recent"]) >= 15:
+                break
             if room(c):
                 pack["recent"].append(c)
 
@@ -229,3 +273,33 @@ def context_pack(
         }
     pack["_budget"] = {"chars_used": used, "budget": budget}
     return pack
+
+
+def _dedupe_changes(changes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse repeated (path, summary) changes, keeping the newest occurrence.
+
+    Auto-capture hooks fire on every save, so the same file gets many identical
+    "(auto) file write" entries — without this they'd crowd out everything else.
+    Input is assumed newest-first; output preserves that order.
+    """
+    seen: set[tuple[str, str]] = set()
+    out: list[dict[str, Any]] = []
+    for c in changes:
+        key = (c.get("path", ""), c.get("summary", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(c)
+    return out
+
+
+def _rank_changes(changes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Sort changes by importance × recency-decay, highest first (stable)."""
+    timestamps = [_parse_ts(c.get("ts")) for c in changes]
+    newest = max((t for t in timestamps if t is not None), default=None)
+
+    def score(c: dict[str, Any]) -> float:
+        kind_w = _KIND_WEIGHT.get(c.get("kind", ""), 1.0)
+        return kind_w * _recency_factor(c.get("ts"), newest)
+
+    return sorted(changes, key=score, reverse=True)
