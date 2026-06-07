@@ -97,6 +97,8 @@ pgraph decide --title "Use JWT not sessions" \
 pgraph history --path src/auth.py             # changes + decisions for one file
 pgraph context src/auth.py --budget 4000      # compact, token-budgeted bundle
 pgraph search "JWT" --label Decision          # full-text search the "why" notes
+pgraph doctor                                 # health check: durability, integrity, search, export
+pgraph eval                                   # measure token savings vs a flat log
 pgraph session end --summary "auth done"
 ```
 
@@ -125,8 +127,10 @@ claude mcp add pgraph -- pgraph-mcp
 ```
 
 Exposed tools: `session_start`, `session_end`, `log_change`, `log_decision`,
-`record_skill_use`, `recent_changes`, `file_history`, `context_pack`, `search`,
-`status`, `sql`.
+`set_decision_status`, `record_skill_use`, `recent_changes`, `file_history`,
+`context_pack`, `search`, `status`, `doctor`, `sql`.
+It also exposes two MCP resources — `pgraph://brief` and `pgraph://status` — so
+a client can pull project memory as context without a tool call.
 The headliner is **`context_pack(paths, budget)`** — hand it the files you're
 about to touch and it returns only the relevant recent changes + decisions,
 trimmed to a character budget, instead of a whole log.

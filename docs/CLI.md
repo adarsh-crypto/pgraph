@@ -24,15 +24,18 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `session show` | Print a session summary (metadata, changes, skills). |
 | `log` | Record a file change. |
 | `decide` | Record a manual "why" note (a decision). |
+| `decision-status` | Set a decision's lifecycle status. |
 | `skill` | Record that a skill/tool was used in a session. |
 | `history` | Recent changes, or one file's full history. |
 | `context` | Build a compact, budgeted context bundle (the token-saver). |
 | `search` | Full-text search decisions/changes/files (BM25-ranked). |
+| `eval` | Measure token savings vs. a flat-log baseline. |
 | `scan` | Walk the folder, recording File + nested Repo nodes. |
 | `ingest-git` | Backfill commit history (project + cloned repos). |
 | `export` | Dump the graph to git-diffable JSONL. |
 | `import` | Rebuild a graph from a JSONL export. |
 | `status` | Health summary: node/edge counts + any open session. |
+| `doctor` | Diagnose graph health: durability, integrity, search index, export freshness. |
 | `sql` | Run an arbitrary **read-only** SQL query (escape hatch). |
 | `install-hooks` | Wire auto-capture into `.claude/settings.json`. |
 
@@ -70,9 +73,21 @@ to the latest open session. Prints the new change id.
 pgraph decide --title "Use JWT not sessions" \
               --body "stateless, scales horizontally" \
               --motivates "$CID" \
-              --about src/auth.py
+              --about src/auth.py \
+              --supersedes "$OLD_DECISION_ID"
 ```
-`--motivates` (a change id) and `--about` (a file path) are both repeatable.
+`--motivates` (a change id), `--about` (a file path), and `--supersedes` (a
+prior decision id) are all repeatable. A new decision starts with status
+`accepted`; each `--supersedes` adds a `SUPERSEDES` edge to the older decision
+and marks it `superseded`, so its stale rationale stops surfacing in the brief.
+
+### `decision-status`
+```bash
+pgraph decision-status <decision_id> rejected
+```
+Set a decision's lifecycle `status` — one of `accepted | superseded |
+rejected`. Superseded and rejected decisions are filtered out of the session
+brief.
 
 ### `skill`
 ```bash
@@ -109,6 +124,18 @@ and degrades to a recency-ordered substring scan if the SQLite build lacks
 FTS5. Each result is the matched node's properties plus its `_label`. This is
 how an agent finds *why* something was done when it doesn't know the file path.
 
+### `eval`
+```bash
+pgraph eval                                  # project-wide
+pgraph eval src/auth.py --budget 4000        # for the files you'd touch
+```
+Measures the token savings pgraph buys. It reconstructs the flat markdown log an
+agent would otherwise re-read every turn (the baseline) and compares its token
+cost against `session_brief` and `context_pack`. Output is JSON: the token
+`method` (exact via `tiktoken` if installed, otherwise a labelled `~4
+chars/token` estimate), graph totals, `flat_log_tokens`, `session_brief_tokens`,
+`context_pack_tokens`, and the `saved_pct` for each.
+
 ### `scan` / `ingest-git`
 ```bash
 pgraph scan                  # record File + nested Repo/doc nodes
@@ -132,6 +159,19 @@ pgraph status
 ```
 Prints per-label node counts, per-type edge counts, totals, and the currently
 open session (if any). A cheap sanity check after `init`/`scan`/`ingest-git`.
+
+### `doctor`
+```bash
+pgraph doctor              # readable ✓/!/✗ report + overall verdict
+pgraph doctor --json       # raw JSON for scripts/CI
+```
+Runs health diagnostics and prints an overall verdict (`ok | warn | error`)
+plus per-check detail: **durability** (`journal_mode=WAL`, `busy_timeout`),
+**integrity** (orphaned edges — endpoints with no node), **search index** (FTS
+health), and **export freshness** (the JSONL export's node count vs. the live
+graph). The readable report marks each check `✓`/`!`/`✗`; `--json` emits the raw
+report instead. The command **exits non-zero** when any check is at error level
+(e.g. orphaned edges), so it doubles as a CI gate.
 
 ### `sql`
 ```bash

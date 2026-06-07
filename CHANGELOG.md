@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-06-07
+
+### Added
+- **`pgraph doctor`** (CLI + `doctor` MCP tool): health diagnostics with an
+  overall ok|warn|error verdict — checks WAL/busy_timeout durability, orphaned
+  edges, the FTS index, and JSONL export freshness.
+- **Decision lifecycle**: decisions now carry a `status`
+  (`accepted | superseded | rejected`) and can replace prior ones via a
+  `(new)-[:SUPERSEDES]->(old)` edge. `decide --supersedes <id>`,
+  `decision-status <id> <status>` (CLI); `log_decision(supersedes=…)` +
+  `set_decision_status` (MCP). Superseded decisions stop surfacing in the brief.
+- **`pgraph eval`** (+ `pgraph/eval.py`): reproducible token-savings measurement
+  — flat-log baseline vs. `session_brief` / `context_pack`. Uses `tiktoken` for
+  exact counts when installed, else a labelled estimate.
+- **MCP resources** `pgraph://brief` and `pgraph://status`: pull project memory
+  as addressable context without a tool round-trip.
+
+### Changed
+- **Smarter `context_pack` ranking**: blends recency (exponential decay, 30-day
+  half-life) with importance (change-kind weight; commits/creates over edits),
+  dedupes repeated `(path, summary)` changes, and uses consistent budget
+  accounting across both branches — so a budget buys signal, not repetition.
+
 ## [0.3.0] — 2026-06-07
 
 ### Added

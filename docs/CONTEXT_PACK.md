@@ -15,11 +15,27 @@ context_pack(g, paths: list[str] | None = None, budget: int = 4000) -> dict
 ```
 
 - **`paths`** — the files you're about to touch. With paths, the pack is
-  *file-centric*. With `paths=None`, it falls back to project-wide *recent
-  activity*.
+  *file-centric*. With `paths=None`, it falls back to project-wide activity,
+  **ranked by importance × recency** (see below).
 - **`budget`** — an approximate **character** budget (a cheap proxy for
   tokens). Entries are added until the budget would be exceeded, then trimming
   stops.
+
+## Ranking and dedupe
+
+With `paths=None`, the pack doesn't just take the newest changes — it pulls a
+wider candidate set and ranks each change by **importance × recency**:
+
+- *importance* — a per-kind weight, so a `commit` or `create` outranks a routine
+  `edit` of similar age;
+- *recency* — exponential decay with a 30-day half-life, measured relative to
+  the newest change in the set (so the ranking is deterministic, not
+  wall-clock-dependent).
+
+Repeated `(path, summary)` changes are **deduped** (keeping the newest), because
+auto-capture hooks emit many identical `(auto) file write` entries that would
+otherwise crowd out everything else. The top entries that fit the budget are
+returned. The file-centric (`paths`) branch likewise dedupes per file.
 
 ## Output shape
 
@@ -32,7 +48,7 @@ context_pack(g, paths: list[str] | None = None, budget: int = 4000) -> dict
       "decisions":[ /* up to 3 most recent decisions about this file */ ]
     }
   ],
-  "recent": [ /* present when paths was None: recent project-wide changes */ ],
+  "recent": [ /* present when paths was None: top-ranked project-wide changes */ ],
   "open_questions": [],            // reserved for future use
   "latest_session": {              // included if budget remains
     "agent": "claude-code",

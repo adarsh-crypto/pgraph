@@ -29,14 +29,28 @@ hits a "run init first" wall.
 | `session_start` | `(agent, summary="")` → id | Open a work session. |
 | `session_end` | `(session_id="", summary="")` | Close a session (defaults to latest open). |
 | `log_change` | `(kind, path, summary="", session_id="", diff_stat="")` → id | Record a change. `kind ∈ edit\|create\|delete\|commit`. |
-| `log_decision` | `(title, body="", motivates_change_ids=[], about_paths=[])` → id | Record a "why" note. |
+| `log_decision` | `(title, body="", motivates_change_ids=[], about_paths=[], supersedes=[])` → id | Record a "why" note. `supersedes` (prior decision ids) marks those older decisions `superseded`. |
+| `set_decision_status` | `(decision_id, status)` | Set a decision's lifecycle status: `accepted \| superseded \| rejected`. |
 | `record_skill_use` | `(session_id, skill)` | Track a skill/tool used. |
 | `recent_changes` | `(limit=20, since="", path="")` → list | Targeted recent history. |
 | `file_history` | `(path)` → dict | All changes + decisions for one file. |
 | `context_pack` | `(paths=None, budget=4000)` → dict | **The token-saver** — compact bundle for the files you're about to touch. |
 | `search` | `(term, labels=None, limit=20)` → list | Full-text search (BM25) of decisions/changes/files — find the *why* by keyword. |
 | `status` | `()` → dict | Node/edge counts + any open session. |
+| `doctor` | `()` → dict | Health diagnostics: durability, integrity, search index, export freshness — with an overall `ok \| warn \| error` verdict. |
 | `sql` | `(query_text)` → list | Arbitrary **read-only** SQL over the nodes/edges tables (writes rejected). |
+
+## Resources
+
+Beyond tools, the server exposes two MCP **resources**. Where a tool is a
+function the agent *calls*, a resource is addressable context the client can
+*pull* — so a client can attach project memory at the start of a conversation
+without spending a tool round-trip.
+
+| Resource URI | MIME type | Contents |
+|--------------|-----------|----------|
+| `pgraph://brief` | `text/markdown` | The session brief: last session, recent changes, and live decisions. |
+| `pgraph://status` | `application/json` | Node/edge counts plus any open session. |
 
 ## The headline: `context_pack`
 

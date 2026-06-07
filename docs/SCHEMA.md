@@ -2,7 +2,7 @@
 
 `pgraph` stores project memory in a single **SQLite** file (Python stdlib
 `sqlite3`) as two physical tables: a generic `nodes` table with a JSON `props`
-blob, plus an `edges` table. The 8 node types and 8 edge types below are the
+blob, plus an `edges` table. The 8 node types and 9 edge types below are the
 **logical** model — they're enforced by the application ([`capture.py`](../pgraph/capture.py))
 and registered in [`schema.py`](../pgraph/schema.py)'s label registry
 (`NODE_LABELS` / `REL_SPECS`), not as separate physical tables. `init()` creates
@@ -29,12 +29,15 @@ the `edges` table.
 | `Session` | `id` | `agent_name`, `started_at`, `ended_at`, `summary` | One work session. `ended_at` is `NULL` while open. |
 | `Change` | `id` | `kind`, `path`, `summary`, `diff_stat`, `ts` | A file edit/create/delete, or a git `commit`. |
 | `File` | `path` | `lang`, `last_seen_at` | A tracked file. Keyed by project-relative path. |
-| `Decision` | `id` | `title`, `body`, `ts` | A manual "why" note — intent a diff can't show. |
+| `Decision` | `id` | `title`, `body`, `status`, `ts` | A manual "why" note — intent a diff can't show. `status ∈ accepted\|superseded\|rejected` (new decisions start `accepted`). |
 | `Repo` | `id` | `name`, `url`, `path`, `kind` | A cloned dependency/doc repo found inside the project. `kind ∈ repo\|doc`. |
 | `Skill` | `name` | — | A skill/tool used in a session. |
 
 `Change.kind` is constrained at the application layer to
-`edit | create | delete | commit` (see `capture.VALID_CHANGE_KINDS`).
+`edit | create | delete | commit` (see `capture.VALID_CHANGE_KINDS`), and
+`Decision.status` to `accepted | superseded | rejected` (see
+`capture.VALID_DECISION_STATUSES`). Only `accepted` decisions appear in the
+session brief — a superseded or rejected "why" is stale and is filtered out.
 
 ## Relationship tables
 
@@ -46,6 +49,7 @@ the `edges` table.
 | `AFFECTS` | `Change` → `File` | the change touched this file |
 | `MOTIVATES` | `Decision` → `Change` | this decision explains that change |
 | `ABOUT` | `Decision` → `File` | this decision concerns that file |
+| `SUPERSEDES` | `Decision` → `Decision` | a newer decision replaces an older one (the old one is marked `superseded`) |
 | `USED_SKILL` | `Session` → `Skill` | this skill was used in the session |
 | `IN_REPO` | `File` → `Repo` | the file lives in a nested cloned repo |
 
