@@ -1,6 +1,6 @@
 import json
 
-from pgraph import capture, query
+from pgraph import capture, query, scan
 from pgraph.install_hooks import install
 
 
@@ -36,6 +36,18 @@ def test_session_brief_respects_budget(graph):
     brief = query.session_brief(graph, budget=300)
     assert len(brief) <= 320  # budget + the truncation marker
     assert "truncated" in brief
+
+
+def test_scan_excludes_named_dir(graph, root):
+    (root / "keep").mkdir()
+    (root / "keep" / "a.py").write_text("x")
+    (root / "skipme").mkdir()
+    (root / "skipme" / "b.py").write_text("y")
+
+    scan.scan_project(graph, root, exclude=["skipme"])
+    paths = {r["path"] for r in graph.all("MATCH (f:File) RETURN f.path AS path")}
+    assert "keep/a.py" in paths
+    assert "skipme/b.py" not in paths
 
 
 def test_install_adds_session_start_hook(root):

@@ -32,14 +32,24 @@ def _is_git_repo(path: Path) -> bool:
     return (path / ".git").exists()
 
 
-def scan_project(g: Graph, root: str | Path, max_files: int = 5000) -> dict:
-    """Record File nodes for tracked-looking files and Repo nodes for nested clones."""
+def scan_project(
+    g: Graph,
+    root: str | Path,
+    max_files: int = 5000,
+    exclude: list[str] | None = None,
+) -> dict:
+    """Record File nodes for tracked-looking files and Repo nodes for nested clones.
+
+    *exclude* is a list of directory names or project-relative path prefixes that
+    are pruned from the walk (e.g. a nested repo you don't want tracked).
+    """
     root = Path(root).resolve()
+    exclude = exclude or []
     files = 0
     repos = 0
     seen_repo_roots: set[Path] = set()
 
-    for dirpath, dirnames, filenames in _walk(root):
+    for dirpath, dirnames, filenames in _walk(root, exclude):
         d = Path(dirpath)
         # Detect a nested cloned repo (not the project root itself).
         if d != root and _is_git_repo(d) and d not in seen_repo_roots:
@@ -62,18 +72,26 @@ def scan_project(g: Graph, root: str | Path, max_files: int = 5000) -> dict:
     return {"files": files, "repos": repos, "root": str(root)}
 
 
-def _walk(root: Path):
-    """os.walk-like generator that prunes ``_SKIP_DIRS`` and hidden dirs.
+def _walk(root: Path, exclude: list[str] | None = None):
+    """os.walk-like generator that prunes ``_SKIP_DIRS``, hidden dirs and *exclude*.
 
-    This is a heuristic, not a ``.gitignore`` parser — see the module docstring.
+    *exclude* entries match either a bare directory name (anywhere in the tree)
+    or a project-relative path prefix. This is a heuristic, not a ``.gitignore``
+    parser — see the module docstring.
     """
     import os
 
+    exclude = exclude or []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [
-            dn for dn in dirnames
-            if dn not in _SKIP_DIRS and not dn.startswith(".")
-        ]
+        kept = []
+        for dn in dirnames:
+            if dn in _SKIP_DIRS or dn.startswith("."):
+                continue
+            rel = str((Path(dirpath) / dn).relative_to(root))
+            if dn in exclude or rel in exclude or any(rel.startswith(e + "/") or rel == e for e in exclude):
+                continue
+            kept.append(dn)
+        dirnames[:] = kept
         yield dirpath, dirnames, filenames
 
 

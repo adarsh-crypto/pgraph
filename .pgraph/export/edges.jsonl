@@ -26,6 +26,11 @@
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "fccbeef0eb9a47588d0689ef3e535518", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "0dad2e889f694041a05f40c4f000c874", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "1a27ff8f01c645cfacdbf639184da1f3", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "2358863251314669b043d67d471a6a8f", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "c61bd1a38ecc4f8285f6d354d8530c85", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "e88b8170c2184c86bd674fe68c6884d8", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "a16a00210148449d82751a42137ff385", "dst": "f481794efd1140a388d0f9276b47c67a"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "824584130bce4b6ba9dedd79cebe7da2", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "cb66908b29e843508eca348341ba03da", "dst": "pgraph/query.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "fb9a3fd9007c48db8efb0f583e4e5135", "dst": "pgraph/db.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "3fd494a213014aaaa9ea4e3c9a5012c5", "dst": ".github/workflows/test.yml"}
@@ -48,6 +53,11 @@
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "fccbeef0eb9a47588d0689ef3e535518", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "0dad2e889f694041a05f40c4f000c874", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "1a27ff8f01c645cfacdbf639184da1f3", "dst": "CHANGELOG.md"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "2358863251314669b043d67d471a6a8f", "dst": "pgraph/scan.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "c61bd1a38ecc4f8285f6d354d8530c85", "dst": "pgraph/scan.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "e88b8170c2184c86bd674fe68c6884d8", "dst": "pgraph/cli.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "a16a00210148449d82751a42137ff385", "dst": "tests/test_session_brief.py"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "824584130bce4b6ba9dedd79cebe7da2", "dst": "tests/test_session_brief.py"}
 {"rel": "MOTIVATES", "from": "Decision", "to": "Change", "src": "2b6cd4c0f7f44482939672aab3813121", "dst": "fb9a3fd9007c48db8efb0f583e4e5135"}
 {"rel": "ABOUT", "from": "Decision", "to": "File", "src": "2b6cd4c0f7f44482939672aab3813121", "dst": "pgraph/mcp_server.py"}
 {"rel": "ABOUT", "from": "Decision", "to": "File", "src": "2b6cd4c0f7f44482939672aab3813121", "dst": "pgraph/db.py"}

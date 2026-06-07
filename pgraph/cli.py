@@ -171,11 +171,12 @@ def context(ctx: click.Context, paths: tuple[str, ...], budget: int) -> None:
 
 # -- ingest ----------------------------------------------------------------
 @main.command()
+@click.option("--exclude", multiple=True, help="Dir name or path prefix to skip (repeatable).")
 @click.pass_context
-def scan(ctx: click.Context) -> None:
+def scan(ctx: click.Context, exclude: tuple[str, ...]) -> None:
     """Walk the project folder, recording File and Repo nodes."""
     with _open(ctx.obj["root"]) as g:
-        stats = scan_mod.scan_project(g, ctx.obj["root"])
+        stats = scan_mod.scan_project(g, ctx.obj["root"], exclude=list(exclude))
     _emit(stats)
 
 

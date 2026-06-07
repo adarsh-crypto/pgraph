@@ -26,6 +26,11 @@
 {"label": "Change", "props": {"id": "fccbeef0eb9a47588d0689ef3e535518", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:27.343858"}}
 {"label": "Change", "props": {"id": "0dad2e889f694041a05f40c4f000c874", "kind": "edit", "path": "README.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:36.736670"}}
 {"label": "Change", "props": {"id": "1a27ff8f01c645cfacdbf639184da1f3", "kind": "edit", "path": "CHANGELOG.md", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:39:42.703373"}}
+{"label": "Change", "props": {"id": "2358863251314669b043d67d471a6a8f", "kind": "edit", "path": "pgraph/scan.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:07.143047"}}
+{"label": "Change", "props": {"id": "c61bd1a38ecc4f8285f6d354d8530c85", "kind": "edit", "path": "pgraph/scan.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:15.095795"}}
+{"label": "Change", "props": {"id": "e88b8170c2184c86bd674fe68c6884d8", "kind": "edit", "path": "pgraph/cli.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:23.619353"}}
+{"label": "Change", "props": {"id": "a16a00210148449d82751a42137ff385", "kind": "edit", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:31.507090"}}
+{"label": "Change", "props": {"id": "824584130bce4b6ba9dedd79cebe7da2", "kind": "edit", "path": "tests/test_session_brief.py", "summary": "(auto) file write", "diff_stat": "", "ts": "2026-06-07T14:41:37.388296"}}
 {"label": "File", "props": {"path": "LICENSE", "lang": "", "last_seen_at": "2026-06-07T13:47:48.133129"}}
 {"label": "File", "props": {"path": "CHANGELOG.md", "lang": "markdown", "last_seen_at": "2026-06-07T14:39:42.717997"}}
 {"label": "File", "props": {"path": "pyproject.toml", "lang": "toml", "last_seen_at": "2026-06-07T13:47:48.156831"}}
@@ -45,8 +50,8 @@
 {"label": "File", "props": {"path": "pgraph/__init__.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.267844"}}
 {"label": "File", "props": {"path": "pgraph/export.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.275819"}}
 {"label": "File", "props": {"path": "pgraph/capture.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.283782"}}
-{"label": "File", "props": {"path": "pgraph/cli.py", "lang": "python", "last_seen_at": "2026-06-07T14:36:51.322713"}}
-{"label": "File", "props": {"path": "pgraph/scan.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.299832"}}
+{"label": "File", "props": {"path": "pgraph/cli.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:23.630352"}}
+{"label": "File", "props": {"path": "pgraph/scan.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:15.106755"}}
 {"label": "File", "props": {"path": "pgraph/mcp_server.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.083089"}}
 {"label": "File", "props": {"path": "pgraph/schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.315807"}}
 {"label": "File", "props": {"path": "tests/conftest.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.323930"}}
@@ -65,7 +70,7 @@
 {"label": "File", "props": {"path": "docs/DEVELOPMENT.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.428894"}}
 {"label": "File", "props": {"path": "docs/PORTABILITY.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.436967"}}
 {"label": "File", "props": {"path": ".github/workflows/test.yml", "lang": "yaml", "last_seen_at": "2026-06-07T13:49:45.898370"}}
-{"label": "File", "props": {"path": "tests/test_session_brief.py", "lang": "python", "last_seen_at": "2026-06-07T14:38:20.674119"}}
+{"label": "File", "props": {"path": "tests/test_session_brief.py", "lang": "python", "last_seen_at": "2026-06-07T14:41:37.403085"}}
 {"label": "Decision", "props": {"id": "2b6cd4c0f7f44482939672aab3813121", "title": "cypher escape hatch is read-only", "body": "An arbitrary-query tool that allows writes lets an agent corrupt the graph outside the validated capture path. Guard with a keyword check; mutations go through log_change/log_decision.", "ts": "2026-06-07T13:49:46.041364"}}
 {"label": "Skill", "props": {"name": "deep-research"}}
 {"label": "Skill", "props": {"name": "update-config"}}
