@@ -67,10 +67,23 @@ def log_change(kind: str, path: str, summary: str = "", session_id: str = "", di
 
 @mcp.tool()
 def log_decision(title: str, body: str = "", motivates_change_ids: list[str] | None = None,
-                 about_paths: list[str] | None = None) -> str:
-    """Record a 'why' note (a decision), optionally linking the changes/files it explains."""
+                 about_paths: list[str] | None = None, supersedes: list[str] | None = None) -> str:
+    """Record a 'why' note (a decision), optionally linking the changes/files it explains.
+
+    Pass `supersedes` (prior decision ids) when this decision replaces older ones;
+    those get marked 'superseded' so stale rationale stops surfacing.
+    """
     with _open() as g:
-        return capture.log_decision(g, title, body, motivates_change_ids, about_paths)
+        return capture.log_decision(g, title, body, motivates_change_ids, about_paths,
+                                    supersedes=supersedes)
+
+
+@mcp.tool()
+def set_decision_status(decision_id: str, status: str) -> str:
+    """Set a decision's lifecycle status: accepted | superseded | rejected."""
+    with _open() as g:
+        capture.set_decision_status(g, decision_id, status)
+        return f"{decision_id} -> {status}"
 
 
 @mcp.tool()

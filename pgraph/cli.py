@@ -114,12 +114,27 @@ def log(ctx: click.Context, kind: str, path: str, summary: str, session_id: str 
 @click.option("--body", default="")
 @click.option("--motivates", multiple=True, help="Change id this decision motivates (repeatable).")
 @click.option("--about", multiple=True, help="File path this decision is about (repeatable).")
+@click.option("--supersedes", multiple=True, help="Prior decision id this one replaces (repeatable).")
 @click.pass_context
-def decide(ctx: click.Context, title: str, body: str, motivates: tuple[str, ...], about: tuple[str, ...]) -> None:
+def decide(ctx: click.Context, title: str, body: str, motivates: tuple[str, ...],
+           about: tuple[str, ...], supersedes: tuple[str, ...]) -> None:
     """Record a manual 'why' note (a decision)."""
     with _open(ctx.obj["root"]) as g:
-        did = capture.log_decision(g, title, body, list(motivates), list(about))
+        did = capture.log_decision(
+            g, title, body, list(motivates), list(about), supersedes=list(supersedes)
+        )
     click.echo(did)
+
+
+@main.command("decision-status")
+@click.argument("decision_id")
+@click.argument("status", type=click.Choice(sorted(capture.VALID_DECISION_STATUSES)))
+@click.pass_context
+def decision_status(ctx: click.Context, decision_id: str, status: str) -> None:
+    """Set a decision's lifecycle status (accepted | superseded | rejected)."""
+    with _open(ctx.obj["root"]) as g:
+        capture.set_decision_status(g, decision_id, status)
+    click.echo(f"Decision {decision_id} -> {status}")
 
 
 @main.command("skill")

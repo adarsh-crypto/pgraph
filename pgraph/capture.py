@@ -96,22 +96,51 @@ def log_change(
 
 
 # -- decisions -------------------------------------------------------------
+VALID_DECISION_STATUSES = {"accepted", "superseded", "rejected"}
+
+
 def log_decision(
     g: Graph,
     title: str,
     body: str = "",
     motivates_change_ids: Iterable[str] | None = None,
     about_paths: Iterable[str] | None = None,
+    supersedes: Iterable[str] | None = None,
 ) -> str:
-    """Record a manual 'why' note, optionally linking the changes/files it explains."""
+    """Record a manual 'why' note, optionally linking the changes/files it explains.
+
+    A decision starts ``accepted``. If *supersedes* lists prior decision ids,
+    each is linked via ``(new)-[:SUPERSEDES]->(old)`` and marked ``superseded``
+    so stale "why" notes stop polluting context.
+    """
     did = new_id()
-    g.add_node("Decision", did, {"id": did, "title": title, "body": body, "ts": now()})
+    g.add_node(
+        "Decision", did,
+        {"id": did, "title": title, "body": body, "status": "accepted", "ts": now()},
+    )
     for cid in motivates_change_ids or []:
         g.add_edge("MOTIVATES", "Decision", did, "Change", cid)
     for path in about_paths or []:
         upsert_file(g, path)
         g.add_edge("ABOUT", "Decision", did, "File", path)
+    for old in supersedes or []:
+        supersede_decision(g, did, old)
     return did
+
+
+def supersede_decision(g: Graph, new_id_: str, old_id: str) -> None:
+    """Mark *old_id* superseded by *new_id_* and link them."""
+    g.add_edge("SUPERSEDES", "Decision", new_id_, "Decision", old_id)
+    g.set_node_props("Decision", old_id, {"status": "superseded"})
+
+
+def set_decision_status(g: Graph, decision_id: str, status: str) -> None:
+    """Set a decision's lifecycle status (accepted | superseded | rejected)."""
+    if status not in VALID_DECISION_STATUSES:
+        raise ValueError(
+            f"status must be one of {sorted(VALID_DECISION_STATUSES)}, got {status!r}"
+        )
+    g.set_node_props("Decision", decision_id, {"status": status})
 
 
 # -- skills ----------------------------------------------------------------

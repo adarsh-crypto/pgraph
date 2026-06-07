@@ -89,7 +89,7 @@ def file_history(g: Graph, path: str) -> dict[str, Any]:
     change_nodes = g.in_neighbors("AFFECTS", "File", path, "Change", order_by="ts", desc=True)
     changes = [_pick(c, "id", "kind", "summary", "diff_stat", "ts") for c in change_nodes]
     decision_nodes = g.in_neighbors("ABOUT", "File", path, "Decision", order_by="ts", desc=True)
-    decisions = [_pick(d, "id", "title", "body", "ts") for d in decision_nodes]
+    decisions = [_pick(d, "id", "title", "body", "status", "ts") for d in decision_nodes]
     return {"path": path, "changes": changes, "decisions": decisions}
 
 
@@ -198,7 +198,12 @@ def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
             lines.append(f"- `{c.get('path', '?')}` — {c.get('kind', '?')}{(': ' + note) if note else ''}")
         lines.append("")
 
-    decision_nodes = g.match_nodes("Decision", order_by="ts", desc=True, limit=5)
+    # Only surface live decisions — a superseded/rejected "why" is noise. Nodes
+    # written before the status field existed have no status and count as live.
+    all_decisions = g.match_nodes("Decision", order_by="ts", desc=True, limit=20)
+    decision_nodes = [
+        d for d in all_decisions if d.get("status", "accepted") == "accepted"
+    ][:5]
     if decision_nodes:
         lines.append("**Recent decisions (the *why*):**")
         for d in decision_nodes:

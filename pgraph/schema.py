@@ -27,6 +27,8 @@ REL_SPECS = [
     ("ABOUT", "Decision", "File"),
     ("USED_SKILL", "Session", "Skill"),
     ("IN_REPO", "File", "Repo"),
+    # A newer decision that replaces an older one: (new)-[:SUPERSEDES]->(old).
+    ("SUPERSEDES", "Decision", "Decision"),
 ]
 REL_TYPES = [r[0] for r in REL_SPECS]
 
