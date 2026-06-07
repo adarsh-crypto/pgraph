@@ -29,6 +29,33 @@ two indexed SQLite tables — a `nodes` table (label + JSON props) and an `edges
 table — so the *change → session → decision* lookups pgraph needs are cheap
 indexed joins, and stay cheap as history grows.
 
+### Measured savings
+
+On this repo's own memory (135 nodes) and the Spokesfan project (4,557 nodes),
+versus an agent re-reading the equivalent flat markdown log each turn
+(token counts estimated at ~4 chars/token):
+
+| What the agent loads | pgraph (this repo) | Spokesfan |
+|----------------------|-------------------:|----------:|
+| Flat log — re-read everything | ~1,593 tok | ~1,902 tok |
+| `session_brief` — injected automatically on open | **~244 tok** | **~292 tok** |
+| `context_pack` — one targeted query | ~904 tok | ~1,181 tok |
+| **Reduction (brief vs flat)** | **~85%** | **~85%** |
+
+The real win is **scaling**: a flat log grows linearly and unbounded, while the
+auto-injected brief stays budget-bounded (~constant). The gap widens with every
+session:
+
+| Log entries | Flat log (re-read all) | pgraph brief | Saved |
+|------------:|-----------------------:|-------------:|------:|
+| 40          | ~1,700 tok             | ~250 tok     | ~85%  |
+| 200         | ~8,600 tok             | ~250 tok     | ~97%  |
+| 1,000       | ~43,000 tok            | ~250 tok     | ~99%  |
+| 5,000       | ~215,000 tok           | ~250 tok     | ~99.9% |
+
+A 1,000-edit project would burn ~43k tokens *per turn* just re-reading its log;
+pgraph keeps that bounded to a few hundred, querying for more only when needed.
+
 ## What it records
 
 | Node | Meaning |

@@ -1,8 +1,10 @@
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "273b11311afe4798841f8d1039e783fd", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
+{"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "4dd4fd9e962c455eb0a6467d597c528b", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "b3b740d2a6ae4e20b9eb531e27336bec", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "d95dcd51a5984da39b8cd29b68335e32", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "IN_PROJECT", "from": "Session", "to": "Project", "src": "f481794efd1140a388d0f9276b47c67a", "dst": "3d1bd9681a234e9da26f32781d40cbbd"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "273b11311afe4798841f8d1039e783fd", "dst": "claude-code"}
+{"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "4dd4fd9e962c455eb0a6467d597c528b", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "b3b740d2a6ae4e20b9eb531e27336bec", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "d95dcd51a5984da39b8cd29b68335e32", "dst": "claude-code"}
 {"rel": "BY_AGENT", "from": "Session", "to": "Agent", "src": "f481794efd1140a388d0f9276b47c67a", "dst": "claude-code"}
@@ -61,6 +63,7 @@
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "a87d99f090774602bd80cb3632afee40", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "ae03d0860c684151bce759992892a5a8", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "b47c2d0940f14b949a0b1380b28c3351", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
+{"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "b93137d6fce54481a83c8503481c88e7", "dst": "4dd4fd9e962c455eb0a6467d597c528b"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "b9894c402b5b416a818ecb89436be69d", "dst": "f481794efd1140a388d0f9276b47c67a"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "be21fb9477724b099d507c664bbe690d", "dst": "d95dcd51a5984da39b8cd29b68335e32"}
 {"rel": "IN_SESSION", "from": "Change", "to": "Session", "src": "c61bd1a38ecc4f8285f6d354d8530c85", "dst": "f481794efd1140a388d0f9276b47c67a"}
@@ -137,6 +140,7 @@
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "a87d99f090774602bd80cb3632afee40", "dst": "pgraph/query.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "ae03d0860c684151bce759992892a5a8", "dst": "pgraph/query.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "b47c2d0940f14b949a0b1380b28c3351", "dst": "README.md"}
+{"rel": "AFFECTS", "from": "Change", "to": "File", "src": "b93137d6fce54481a83c8503481c88e7", "dst": "README.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "b9894c402b5b416a818ecb89436be69d", "dst": "pgraph/install_hooks.py"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "be21fb9477724b099d507c664bbe690d", "dst": "docs/CLI.md"}
 {"rel": "AFFECTS", "from": "Change", "to": "File", "src": "c61bd1a38ecc4f8285f6d354d8530c85", "dst": "pgraph/scan.py"}
