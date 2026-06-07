@@ -27,6 +27,7 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `skill` | Record that a skill/tool was used in a session. |
 | `history` | Recent changes, or one file's full history. |
 | `context` | Build a compact, budgeted context bundle (the token-saver). |
+| `search` | Full-text search decisions/changes/files (BM25-ranked). |
 | `scan` | Walk the folder, recording File + nested Repo nodes. |
 | `ingest-git` | Backfill commit history (project + cloned repos). |
 | `export` | Dump the graph to git-diffable JSONL. |
@@ -94,6 +95,19 @@ The headline retrieval. Pass the files you're about to touch; get back only the
 recent changes + decisions for them, trimmed to a rough character budget. With
 no paths it returns recent project-wide activity. See
 [CONTEXT_PACK.md](CONTEXT_PACK.md) for the output shape and budgeting rules.
+
+### `search`
+```bash
+pgraph search "connection pool"            # across all node types
+pgraph search "JWT" --label Decision       # restrict to decisions (repeatable)
+pgraph search "auth" --limit 5
+```
+Full-text search over the human-meaningful text of nodes — decision titles +
+bodies, change summaries, file paths, repo names. Uses SQLite **FTS5/BM25** for
+relevance ranking when available (each hit carries a `_score`; lower is better),
+and degrades to a recency-ordered substring scan if the SQLite build lacks
+FTS5. Each result is the matched node's properties plus its `_label`. This is
+how an agent finds *why* something was done when it doesn't know the file path.
 
 ### `scan` / `ingest-git`
 ```bash

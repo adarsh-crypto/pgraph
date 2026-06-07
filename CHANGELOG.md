@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-06-07
+
+### Added
+- **Full-text search** (`pgraph search <term>`, `search` MCP tool, `query.search`):
+  keyword search over decision titles/bodies, change summaries, file paths and
+  repo names, **BM25-ranked** via SQLite **FTS5**. Restrict with `--label`
+  (e.g. `--label Decision`). Degrades gracefully to a recency-ordered substring
+  scan when a SQLite build lacks FTS5 — still zero new dependencies. This closes
+  the biggest retrieval gap vs. comparable agent-memory tools (recency-only →
+  relevance). The index rebuilds on `import` and via `Graph.reindex()`.
+
+### Fixed
+- **Concurrency:** the writable connection now sets `PRAGMA busy_timeout=5000`
+  in addition to WAL, so overlapping writers (e.g. Claude Code + Codex) wait for
+  the lock instead of raising `database is locked`.
+
+### Changed
+- Dropped a dead `datetime` import from `db.py`.
+
 ## [0.2.0] — 2026-06-07
 
 ### Changed — storage engine: Kùzu → stdlib SQLite (BREAKING for the escape hatch)

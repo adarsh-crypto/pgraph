@@ -169,6 +169,18 @@ def context(ctx: click.Context, paths: tuple[str, ...], budget: int) -> None:
         _emit(query.context_pack(g, list(paths) or None, budget))
 
 
+@main.command()
+@click.argument("term")
+@click.option("--label", "labels", multiple=True,
+              help="Restrict to node labels, e.g. --label Decision (repeatable).")
+@click.option("--limit", default=20)
+@click.pass_context
+def search(ctx: click.Context, term: str, labels: tuple[str, ...], limit: int) -> None:
+    """Full-text search decisions, changes and files (BM25-ranked when available)."""
+    with _open(ctx.obj["root"]) as g:
+        _emit(query.search(g, term, labels=list(labels) or None, limit=limit))
+
+
 # -- ingest ----------------------------------------------------------------
 @main.command()
 @click.option("--exclude", multiple=True, help="Dir name or path prefix to skip (repeatable).")
@@ -211,6 +223,8 @@ def import_cmd(ctx: click.Context) -> None:
     g.init_schema()
     try:
         out = export_mod.import_graph(g, root)
+        # Rebuild the full-text index over everything just imported.
+        out["indexed"] = g.reindex()
     finally:
         g.close()
     _emit(out)

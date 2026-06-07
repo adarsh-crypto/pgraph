@@ -108,6 +108,18 @@ def context_pack(paths: list[str] | None = None, budget: int = 4000) -> dict[str
 
 
 @mcp.tool()
+def search(term: str, labels: list[str] | None = None, limit: int = 20) -> list[dict[str, Any]]:
+    """Full-text search project memory (decisions, changes, files) by keyword.
+
+    Relevance-ranked (BM25) when available. Optionally restrict to node labels
+    like ["Decision"] or ["Change"]. Returns each hit's props plus its _label.
+    Use this to find *why* something was done when you don't know the file path.
+    """
+    with _open() as g:
+        return query.search(g, term, labels=labels, limit=limit)
+
+
+@mcp.tool()
 def status() -> dict[str, Any]:
     """Health summary of the project graph: node/edge counts and any open session."""
     with _open() as g:
