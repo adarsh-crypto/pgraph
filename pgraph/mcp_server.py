@@ -164,6 +164,34 @@ def sql(query_text: str) -> list[dict[str, Any]]:
         return [{k: str(v) for k, v in r.items()} for r in g.sql(query_text)]
 
 
+# -- resources --------------------------------------------------------------
+# Resources let an MCP client pull project memory as addressable context without
+# a tool round-trip — e.g. attach pgraph://brief at the start of a conversation.
+
+@mcp.resource(
+    "pgraph://brief",
+    name="Project memory brief",
+    description="Compact markdown brief: last session, recent changes, live decisions.",
+    mime_type="text/markdown",
+)
+def brief_resource() -> str:
+    with _open() as g:
+        return query.session_brief(g) or "# pgraph project memory\n\n_(empty — no recorded work yet)_\n"
+
+
+@mcp.resource(
+    "pgraph://status",
+    name="Project memory status",
+    description="Node/edge counts and any open session, as JSON.",
+    mime_type="application/json",
+)
+def status_resource() -> str:
+    import json
+
+    with _open() as g:
+        return json.dumps(query.status(g), indent=2, default=str)
+
+
 def main() -> None:
     mcp.run()
 
