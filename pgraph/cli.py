@@ -12,7 +12,14 @@ from pathlib import Path
 
 import click
 
-from . import capture, eval as eval_mod, export as export_mod, query, scan as scan_mod
+from . import (
+    capture,
+    chatlog as chatlog_mod,
+    eval as eval_mod,
+    export as export_mod,
+    query,
+    scan as scan_mod,
+)
 from .db import Graph, WriteQueryRejected, assert_read_only, find_project_root
 from .schema import init as schema_init
 
@@ -236,6 +243,63 @@ def scan(ctx: click.Context, exclude: tuple[str, ...]) -> None:
     """Walk the project folder, recording File and Repo nodes."""
     with _open(ctx.obj["root"]) as g:
         stats = scan_mod.scan_project(g, ctx.obj["root"], exclude=list(exclude))
+    _emit(stats)
+
+
+@main.command("import-chats")
+@click.option("--source", type=click.Choice(["claude", "codex", "both"]), default="both",
+              help="Which agent's transcripts to import.")
+@click.option("--prompts", "prompts_mode", type=click.Choice(["full", "truncated", "none"]),
+              default="full", help="How much of each user prompt to store.")
+@click.option("--dry-run", is_flag=True,
+              help="Show what would be imported (counts + files) without writing.")
+@click.option("--no-attribute", is_flag=True,
+              help="Skip the project-scope safety filter (import every discovered session).")
+@click.pass_context
+def import_chats_cmd(ctx: click.Context, source: str, prompts_mode: str,
+                     dry_run: bool, no_attribute: bool) -> None:
+    """Import Claude Code / Codex chat transcripts for this project into the graph.
+
+    Reads the agents' own on-disk session logs (~/.claude/projects, ~/.codex/
+    sessions), keeps only sessions whose work happened under this project root,
+    and folds them in as Session/Prompt/Change/Skill nodes. Purely deterministic
+    (no LLM). Re-running is idempotent. Transcripts may contain secrets you
+    typed — review with --dry-run first; nothing leaves your machine.
+    """
+    root = ctx.obj["root"]
+    attribute = not no_attribute
+    sessions = chatlog_mod.collect(root, source=source)
+
+    if dry_run:
+        # Surface exactly what an import would pull in, without touching the graph.
+        with _open(root) as g:
+            existing = {
+                s.session_pk for s in sessions
+                if g.get_node("Session", s.session_pk) is not None
+            }
+        preview = {
+            "root": str(root), "source": source, "prompts": prompts_mode,
+            "discovered": len(sessions),
+            "would_import": [], "skipped_unrelated": 0, "already_imported": len(existing),
+        }
+        for s in sessions:
+            if attribute and not chatlog_mod.belongs_to_project(s, root):
+                preview["skipped_unrelated"] += 1
+                continue
+            if s.session_pk in existing:
+                continue
+            preview["would_import"].append({
+                "source": s.source, "agent": s.agent, "started_at": s.started_at,
+                "prompts": len(s.prompts), "changes": len(s.changes),
+                "skills": len(s.skills), "file": s.path,
+            })
+        _emit(preview)
+        return
+
+    with _open(root) as g:
+        stats = chatlog_mod.import_chats(
+            g, sessions, root, prompts=prompts_mode, attribute=attribute
+        )
     _emit(stats)
 
 

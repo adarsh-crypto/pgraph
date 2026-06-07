@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-06-08
+
+### Added
+- **`pgraph import-chats`**: import existing Claude Code and Codex chat
+  transcripts into the graph — turning the agents' own on-disk session logs
+  (`~/.claude/projects`, `~/.codex/sessions`) into project memory. Extracts
+  sessions, the **user's prompts** (the intent a diff can't show, as a new
+  `Prompt` node), file edits, and the skills/tools used. **Purely
+  deterministic** — JSONL parsing only, no LLM, no network — and idempotent
+  (re-running imports nothing new). Opt-in CLI action, never a hook.
+  - `--dry-run` previews exactly what would be imported (per-session counts +
+    source files) before anything is written.
+  - `--prompts full|truncated|none` controls how much prompt text is stored
+    (transcripts can contain secrets you typed; nothing leaves the machine).
+  - `--source claude|codex|both`.
+  - `recent_prompts` MCP tool + `query.recent_prompts` to recall past intent;
+    imported prompts are full-text searchable like everything else.
+- **Cross-machine / cross-OS attribution.** A transcript imports into the right
+  project even when its recorded path differs from where the project now lives —
+  matched by project-folder name across **Windows, macOS and Linux** (and UNC
+  paths), so moving between machines/OSes Just Works. A *differently named*
+  project (e.g. an unrelated repo) is still kept out. Foreign relative/Windows
+  paths are never resolved against the local cwd (which would falsely match),
+  closing a cross-project data-leak path.
+
 ## [0.4.0] — 2026-06-07
 
 ### Added

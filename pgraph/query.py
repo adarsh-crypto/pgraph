@@ -103,6 +103,17 @@ def search(g: Graph, term: str, labels: list[str] | None = None, limit: int = 20
     return [_clean(hit) for hit in g.search(term, labels=labels, limit=limit)]
 
 
+def recent_prompts(g: Graph, limit: int = 20) -> list[dict[str, Any]]:
+    """Most recent imported user prompts (the *intent* behind the work), newest first.
+
+    Populated by ``pgraph import-chats``. Prompts are the one thing a code diff
+    can never reconstruct — what the user actually asked for — so they're the
+    highest-signal context an imported transcript contributes.
+    """
+    rows = g.match_nodes("Prompt", order_by="ts", desc=True, limit=limit)
+    return [_pick(r, "id", "text", "ts", "source") for r in rows]
+
+
 def decisions_for(g: Graph, change_id: str) -> list[dict[str, Any]]:
     """Decisions that motivated a given change."""
     nodes = g.in_neighbors("MOTIVATES", "Change", change_id, "Decision", order_by="ts", desc=True)
