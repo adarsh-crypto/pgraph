@@ -175,6 +175,28 @@ def status(ctx: click.Context) -> None:
 
 
 @main.command()
+@click.option("--json", "as_json", is_flag=True, help="Emit raw JSON instead of a readable report.")
+@click.pass_context
+def doctor(ctx: click.Context, as_json: bool) -> None:
+    """Diagnose the graph: durability, integrity, search index, export freshness.
+
+    Exits non-zero if any check is at error level (e.g. orphaned edges).
+    """
+    with _open(ctx.obj["root"]) as g:
+        report = query.diagnose(g)
+    if as_json:
+        _emit(report)
+    else:
+        marks = {"ok": "✓", "warn": "!", "error": "✗"}
+        for c in report["checks"]:
+            click.echo(f"  {marks.get(c['level'], '?')} {c['check']}: {c['detail']}")
+        t = report["totals"]
+        click.echo(f"\noverall: {report['overall'].upper()}  ({t['nodes']} nodes, {t['edges']} edges)")
+    if report["overall"] == "error":
+        raise click.ClickException("doctor found errors (see above)")
+
+
+@main.command()
 @click.argument("paths", nargs=-1)
 @click.option("--budget", default=4000, help="Approximate character budget for the bundle.")
 @click.pass_context

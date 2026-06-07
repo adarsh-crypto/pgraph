@@ -166,6 +166,70 @@ def status(g: Graph) -> dict[str, Any]:
     }
 
 
+def diagnose(g: Graph) -> dict[str, Any]:
+    """Health diagnostics: a list of checks with ok/warn/error and an overall verdict.
+
+    Surfaces the things that quietly go wrong in a multi-tool setup: missing
+    durability pragmas, a stale or missing JSONL export, orphaned edges, a
+    full-text index that drifted out of sync, or an unsupported SQLite build.
+    """
+    import os
+    from pathlib import Path
+
+    from .db import export_dir
+
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, level: str, detail: str) -> None:
+        checks.append({"check": name, "level": level, "detail": detail})
+
+    st = status(g)
+    total_nodes = st["totals"]["nodes"]
+
+    # Durability pragmas.
+    jm = str(g.pragma("journal_mode") or "").lower()
+    add("journal_mode", "ok" if jm == "wal" else "warn", f"journal_mode={jm or '?'}")
+    bt = int(g.pragma("busy_timeout") or 0)
+    add("busy_timeout", "ok" if bt >= 1000 else "warn", f"busy_timeout={bt}ms")
+
+    # Integrity: every edge endpoint resolves to a node.
+    orphans = g.orphan_edges()
+    add("orphan_edges", "ok" if orphans == 0 else "error",
+        "no orphaned edges" if orphans == 0 else f"{orphans} edge(s) point at missing nodes")
+
+    # Full-text index health.
+    if g.fts_enabled:
+        indexed = g.fts_count()
+        # Not every node is indexable (only those with searchable text), so the
+        # index can legitimately be smaller; flag only an empty index on a
+        # non-empty graph, which means it was never built (run `pgraph import`).
+        if total_nodes > 0 and indexed == 0:
+            add("fts_index", "warn", "FTS index empty on a non-empty graph — run `pgraph import` to rebuild")
+        else:
+            add("fts_index", "ok", f"FTS5 enabled, {indexed} rows indexed")
+    else:
+        add("fts_index", "warn", "FTS5 not available in this SQLite build — search falls back to substring scan")
+
+    # Export freshness.
+    exp = export_dir(g.root) / "nodes.jsonl"
+    if not exp.exists():
+        add("export", "warn", "no JSONL export yet — run `pgraph export` to create a portable snapshot")
+    else:
+        try:
+            exported = sum(1 for line in exp.read_text().splitlines() if line.strip())
+        except OSError:
+            exported = -1
+        if exported == total_nodes:
+            add("export", "ok", f"export in sync ({exported} nodes)")
+        else:
+            add("export", "warn",
+                f"export has {exported} nodes but the live graph has {total_nodes} — run `pgraph export`")
+
+    levels = {c["level"] for c in checks}
+    overall = "error" if "error" in levels else ("warn" if "warn" in levels else "ok")
+    return {"overall": overall, "checks": checks, "totals": st["totals"]}
+
+
 def session_brief(g: Graph, limit: int = 8, budget: int = 2000) -> str:
     """A compact markdown brief of where the project stands — for session start.
 

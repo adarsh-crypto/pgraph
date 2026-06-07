@@ -140,6 +140,16 @@ def status() -> dict[str, Any]:
 
 
 @mcp.tool()
+def doctor() -> dict[str, Any]:
+    """Diagnose the graph: durability pragmas, edge integrity, search index, export freshness.
+
+    Returns an overall verdict (ok | warn | error) plus per-check detail.
+    """
+    with _open() as g:
+        return query.diagnose(g)
+
+
+@mcp.tool()
 def sql(query_text: str) -> list[dict[str, Any]]:
     """Run an arbitrary read-only SQL query against the project graph.
 
