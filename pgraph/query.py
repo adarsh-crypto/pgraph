@@ -115,6 +115,48 @@ def session_summary(g: Graph, session_id: str | None = None) -> dict[str, Any]:
     return out
 
 
+_NODE_LABELS = ["Project", "Agent", "Session", "Change", "File", "Decision", "Repo", "Skill"]
+_REL_TYPES = [
+    "IN_PROJECT", "BY_AGENT", "IN_SESSION", "AFFECTS",
+    "MOTIVATES", "ABOUT", "USED_SKILL", "IN_REPO",
+]
+
+
+def status(g: Graph) -> dict[str, Any]:
+    """A quick health check: per-label node counts, edge counts, open session.
+
+    Cheap to run and handy as a sanity check after init/scan/ingest or to see
+    whether a session is currently open.
+    """
+    nodes: dict[str, int] = {}
+    total_nodes = 0
+    for label in _NODE_LABELS:
+        row = g.one(f"MATCH (n:{label}) RETURN count(n) AS c")
+        n = int(row["c"]) if row else 0
+        nodes[label] = n
+        total_nodes += n
+
+    edges: dict[str, int] = {}
+    total_edges = 0
+    for rel in _REL_TYPES:
+        row = g.one(f"MATCH ()-[r:{rel}]->() RETURN count(r) AS c")
+        n = int(row["c"]) if row else 0
+        edges[rel] = n
+        total_edges += n
+
+    open_sess = g.one(
+        """MATCH (s:Session) WHERE s.ended_at IS NULL
+           RETURN s.id AS id, s.agent_name AS agent, s.started_at AS started_at
+           ORDER BY s.started_at DESC LIMIT 1"""
+    )
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "totals": {"nodes": total_nodes, "edges": total_edges},
+        "open_session": _clean(open_sess) if open_sess else None,
+    }
+
+
 def context_pack(
     g: Graph, paths: list[str] | None = None, budget: int = 4000
 ) -> dict[str, Any]:

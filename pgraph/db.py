@@ -11,6 +11,36 @@ import kuzu
 from . import EXPORT_SUBDIR, GRAPH_SUBDIR, PGRAPH_DIR
 
 
+# Cypher keywords that mutate the graph. The `cypher` escape hatch is meant for
+# reads only, so a query containing any of these (as a whole word) is rejected.
+_WRITE_KEYWORDS = frozenset({
+    "CREATE", "MERGE", "SET", "DELETE", "REMOVE", "DETACH", "DROP",
+    "ALTER", "COPY", "INSTALL", "LOAD", "ATTACH", "USE",
+})
+
+
+class WriteQueryRejected(ValueError):
+    """Raised when a write statement is passed to a read-only query path."""
+
+
+def assert_read_only(cypher: str) -> None:
+    """Raise :class:`WriteQueryRejected` if *cypher* looks like it mutates data.
+
+    A deliberately conservative, token-level check: it tokenizes on word
+    boundaries and rejects the query if any write keyword appears. This guards
+    the ``cypher`` escape hatch (CLI + MCP) from being used to mutate the graph.
+    """
+    import re
+
+    tokens = {t.upper() for t in re.findall(r"[A-Za-z_]+", cypher)}
+    hit = tokens & _WRITE_KEYWORDS
+    if hit:
+        raise WriteQueryRejected(
+            "cypher is read-only; refusing statement containing "
+            + ", ".join(sorted(hit))
+        )
+
+
 def find_project_root(start: str | os.PathLike[str] | None = None) -> Path | None:
     """Walk upward from *start* (default cwd) looking for an existing ``.pgraph`` dir.
 

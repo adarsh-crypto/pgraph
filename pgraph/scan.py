@@ -1,9 +1,12 @@
 """Populate File/Repo nodes from the project folder and ingest git history.
 
-`scan_project` walks the tree (respecting .gitignore-ish defaults) and records
-File nodes plus any nested cloned repos/docs as Repo nodes. `ingest_all_git`
-backfills commit history for the project root and each detected repo as
-Change nodes of kind ``commit``.
+`scan_project` walks the tree and records File nodes plus any nested cloned
+repos/docs as Repo nodes. `ingest_all_git` backfills commit history for the
+project root and each detected repo as Change nodes of kind ``commit``.
+
+Note: the walk does not parse ``.gitignore``. It prunes a fixed set of common
+noise directories (``_SKIP_DIRS``) and all dotfile/dot-directories. This keeps
+the scan dependency-free; honouring real ``.gitignore`` rules is future work.
 """
 
 from __future__ import annotations
@@ -60,7 +63,10 @@ def scan_project(g: Graph, root: str | Path, max_files: int = 5000) -> dict:
 
 
 def _walk(root: Path):
-    """os.walk-like generator that prunes skip dirs and hidden dirs."""
+    """os.walk-like generator that prunes ``_SKIP_DIRS`` and hidden dirs.
+
+    This is a heuristic, not a ``.gitignore`` parser — see the module docstring.
+    """
     import os
 
     for dirpath, dirnames, filenames in os.walk(root):

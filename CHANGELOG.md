@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `pgraph status` command + `status` MCP tool: node/edge counts and any open
+  session — a quick health check.
+- Read-only guard on the `cypher` escape hatch (CLI + MCP): write statements
+  (`CREATE`, `MERGE`, `SET`, `DELETE`, …) are rejected so the graph can only be
+  mutated through the validated capture path.
+- GitHub Actions CI running the test suite on Python 3.11/3.12/3.13.
+- `CONTRIBUTING.md`, issue/PR templates, and a `[dev]` extra for `pytest`.
+- This repo now dogfoods pgraph: its own development memory is committed as a
+  JSONL export under `.pgraph/export/`.
+
+### Changed
+- `scan` docstrings corrected: the walk prunes a fixed noise-dir set and
+  dotfiles; it does not parse `.gitignore` (clarified as future work).
+
 ## [0.1.0] — 2026-06-07
 
 Initial release.

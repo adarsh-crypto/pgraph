@@ -1,0 +1,49 @@
+{"label": "Project", "props": {"id": "3d1bd9681a234e9da26f32781d40cbbd", "name": "Project_graph", "root_path": "/Users/adarshsinha/Desktop/Project_graph", "created_at": "2026-06-07T13:47:48.025263"}}
+{"label": "Agent", "props": {"id": "claude-code", "name": "claude-code"}}
+{"label": "Session", "props": {"id": "273b11311afe4798841f8d1039e783fd", "agent_name": "claude-code", "started_at": "2026-06-07T13:49:45.467257", "ended_at": "2026-06-07T13:49:56.205818", "summary": "Polish pass complete; 21 tests green"}}
+{"label": "Change", "props": {"id": "commit:Project_graph:6013f323ee6e1e58c44559b4eec210b883e0acdc", "kind": "commit", "path": "Project_graph", "summary": "Initial commit: pgraph \u2014 graph-based project memory for coding agents", "diff_stat": "6013f323ee6e", "ts": "2026-06-06T19:49:27"}}
+{"label": "Change", "props": {"id": "cb66908b29e843508eca348341ba03da", "kind": "create", "path": "pgraph/query.py", "summary": "add status() health-check query", "diff_stat": "", "ts": "2026-06-07T13:49:45.609957"}}
+{"label": "Change", "props": {"id": "fb9a3fd9007c48db8efb0f583e4e5135", "kind": "edit", "path": "pgraph/db.py", "summary": "add read-only cypher guard (assert_read_only)", "diff_stat": "", "ts": "2026-06-07T13:49:45.743739"}}
+{"label": "Change", "props": {"id": "3fd494a213014aaaa9ea4e3c9a5012c5", "kind": "create", "path": ".github/workflows/test.yml", "summary": "CI: pytest on py3.11-3.13", "diff_stat": "", "ts": "2026-06-07T13:49:45.888024"}}
+{"label": "File", "props": {"path": "LICENSE", "lang": "", "last_seen_at": "2026-06-07T13:47:48.133129"}}
+{"label": "File", "props": {"path": "CHANGELOG.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.148838"}}
+{"label": "File", "props": {"path": "pyproject.toml", "lang": "toml", "last_seen_at": "2026-06-07T13:47:48.156831"}}
+{"label": "File", "props": {"path": "README.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.165649"}}
+{"label": "File", "props": {"path": ".gitignore", "lang": "", "last_seen_at": "2026-06-07T13:47:48.173807"}}
+{"label": "File", "props": {"path": "CONTRIBUTING.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.180761"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/PKG-INFO", "lang": "", "last_seen_at": "2026-06-07T13:47:48.188906"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/SOURCES.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.196863"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/entry_points.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.204858"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/requires.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.211782"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/top_level.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.219812"}}
+{"label": "File", "props": {"path": "pgraph.egg-info/dependency_links.txt", "lang": "", "last_seen_at": "2026-06-07T13:47:48.227725"}}
+{"label": "File", "props": {"path": "pgraph/db.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.065179"}}
+{"label": "File", "props": {"path": "pgraph/install_hooks.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.243871"}}
+{"label": "File", "props": {"path": "pgraph/query.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:45.620096"}}
+{"label": "File", "props": {"path": "pgraph/hook.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.259839"}}
+{"label": "File", "props": {"path": "pgraph/__init__.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.267844"}}
+{"label": "File", "props": {"path": "pgraph/export.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.275819"}}
+{"label": "File", "props": {"path": "pgraph/capture.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.283782"}}
+{"label": "File", "props": {"path": "pgraph/cli.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.291816"}}
+{"label": "File", "props": {"path": "pgraph/scan.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.299832"}}
+{"label": "File", "props": {"path": "pgraph/mcp_server.py", "lang": "python", "last_seen_at": "2026-06-07T13:49:46.083089"}}
+{"label": "File", "props": {"path": "pgraph/schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.315807"}}
+{"label": "File", "props": {"path": "tests/conftest.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.323930"}}
+{"label": "File", "props": {"path": "tests/test_status_and_guard.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.331801"}}
+{"label": "File", "props": {"path": "tests/test_export_roundtrip.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.339911"}}
+{"label": "File", "props": {"path": "tests/test_schema.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.347786"}}
+{"label": "File", "props": {"path": "tests/test_capture.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.355783"}}
+{"label": "File", "props": {"path": "tests/test_query.py", "lang": "python", "last_seen_at": "2026-06-07T13:47:48.363847"}}
+{"label": "File", "props": {"path": "docs/ARCHITECTURE.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.371950"}}
+{"label": "File", "props": {"path": "docs/MCP.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.379812"}}
+{"label": "File", "props": {"path": "docs/CLI.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.387822"}}
+{"label": "File", "props": {"path": "docs/SCHEMA.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.395924"}}
+{"label": "File", "props": {"path": "docs/CONTEXT_PACK.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.404901"}}
+{"label": "File", "props": {"path": "docs/README.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.412828"}}
+{"label": "File", "props": {"path": "docs/HOOKS.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.420933"}}
+{"label": "File", "props": {"path": "docs/DEVELOPMENT.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.428894"}}
+{"label": "File", "props": {"path": "docs/PORTABILITY.md", "lang": "markdown", "last_seen_at": "2026-06-07T13:47:48.436967"}}
+{"label": "File", "props": {"path": ".github/workflows/test.yml", "lang": "yaml", "last_seen_at": "2026-06-07T13:49:45.898370"}}
+{"label": "Decision", "props": {"id": "2b6cd4c0f7f44482939672aab3813121", "title": "cypher escape hatch is read-only", "body": "An arbitrary-query tool that allows writes lets an agent corrupt the graph outside the validated capture path. Guard with a keyword check; mutations go through log_change/log_decision.", "ts": "2026-06-07T13:49:46.041364"}}
+{"label": "Skill", "props": {"name": "deep-research"}}
+{"label": "Skill", "props": {"name": "update-config"}}

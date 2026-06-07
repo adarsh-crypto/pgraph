@@ -8,8 +8,14 @@ build/
 *.py[cod]
 .DS_Store
 
-# Personal, machine-local Claude Code overrides
-.claude/settings.local.json
+# Claude Code config is machine-specific here: install-hooks bakes an absolute
+# pgraph path into settings.json, so it's not portable to other clones. Each
+# user runs `pgraph install-hooks` themselves (see docs/HOOKS.md).
+.claude/
+
+# pgraph dogfoods itself: the live Kùzu DB is machine-local (gitignored below),
+# but the JSONL export under .pgraph/export/ IS committed — it's the portable,
+# git-diffable snapshot of this repo's own development memory.
 
 # A project's live graph DB is machine-local; the JSONL export is what you commit.
 .pgraph/graph/

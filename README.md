@@ -1,5 +1,9 @@
 # pgraph — local, portable, graph-based project memory for coding agents
 
+[![tests](https://github.com/adarsh-crypto/pgraph/actions/workflows/test.yml/badge.svg)](https://github.com/adarsh-crypto/pgraph/actions/workflows/test.yml)
+[![Python 3.11–3.13](https://img.shields.io/badge/python-3.11%E2%80%933.13-blue)](https://github.com/adarsh-crypto/pgraph)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 When you work on a project with a coding agent (Claude Code, Codex, …), the
 "what changed / when / why" context usually lives in a growing markdown file.
 Re-reading that whole file on every turn burns tokens and scales badly.
@@ -121,6 +125,14 @@ block your work.
 pip install pytest
 pytest -q
 ```
+
+## This repo dogfoods pgraph
+
+`pgraph` tracks its own development. The committed
+[`.pgraph/export/`](.pgraph/export/) is this repo's own project memory — a
+git-diffable JSONL snapshot of the sessions, changes and decisions behind it.
+Rebuild the live graph from it with `pgraph import`, then explore with
+`pgraph status`, `pgraph history`, or `pgraph context <file>`.
 
 ## Documentation
 

@@ -17,7 +17,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from . import capture, query
-from .db import Graph, find_project_root
+from .db import Graph, assert_read_only, find_project_root
 from .schema import init as schema_init
 
 mcp = FastMCP("pgraph")
@@ -108,8 +108,20 @@ def context_pack(paths: list[str] | None = None, budget: int = 4000) -> dict[str
 
 
 @mcp.tool()
+def status() -> dict[str, Any]:
+    """Health summary of the project graph: node/edge counts and any open session."""
+    with _open() as g:
+        return query.status(g)
+
+
+@mcp.tool()
 def cypher(query_text: str) -> list[dict[str, Any]]:
-    """Run an arbitrary read Cypher query against the project graph."""
+    """Run an arbitrary read-only Cypher query against the project graph.
+
+    Write statements (CREATE, MERGE, SET, DELETE, …) are rejected — use the
+    dedicated tools (log_change, log_decision, …) to mutate the graph.
+    """
+    assert_read_only(query_text)
     with _open() as g:
         return [{k: str(v) for k, v in r.items()} for r in g.all(query_text)]
 

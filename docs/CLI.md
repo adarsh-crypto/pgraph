@@ -31,7 +31,8 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `ingest-git` | Backfill commit history (project + cloned repos). |
 | `export` | Dump the graph to git-diffable JSONL. |
 | `import` | Rebuild a graph from a JSONL export. |
-| `cypher` | Run an arbitrary read Cypher query (escape hatch). |
+| `status` | Health summary: node/edge counts + any open session. |
+| `cypher` | Run an arbitrary **read-only** Cypher query (escape hatch). |
 | `install-hooks` | Wire auto-capture into `.claude/settings.json`. |
 
 There are also two hidden commands, `hook-post-tool-use` and `hook-stop`, that
@@ -110,11 +111,20 @@ pgraph import                # rebuilds the graph from the JSONL
 ```
 See [PORTABILITY.md](PORTABILITY.md).
 
+### `status`
+```bash
+pgraph status
+```
+Prints per-label node counts, per-type edge counts, totals, and the currently
+open session (if any). A cheap sanity check after `init`/`scan`/`ingest-git`.
+
 ### `cypher`
 ```bash
 pgraph cypher "MATCH (c:Change) RETURN c.path, c.summary ORDER BY c.ts DESC LIMIT 5"
 ```
-Read-only escape hatch. Values are stringified for safe JSON output.
+Read-only escape hatch. Write statements (`CREATE`, `MERGE`, `SET`, `DELETE`,
+`REMOVE`, `DROP`, …) are **rejected** — use the dedicated commands to mutate
+the graph. Values are stringified for safe JSON output.
 
 ### `install-hooks`
 ```bash

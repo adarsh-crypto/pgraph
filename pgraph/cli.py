@@ -13,7 +13,7 @@ from pathlib import Path
 import click
 
 from . import capture, export as export_mod, query, scan as scan_mod
-from .db import Graph, find_project_root
+from .db import Graph, WriteQueryRejected, assert_read_only, find_project_root
 from .schema import init as schema_init
 
 
@@ -152,6 +152,14 @@ def history(ctx: click.Context, path: str | None, limit: int, since: str | None)
 
 
 @main.command()
+@click.pass_context
+def status(ctx: click.Context) -> None:
+    """Show a health summary: node/edge counts and any open session."""
+    with _open(ctx.obj["root"]) as g:
+        _emit(query.status(g))
+
+
+@main.command()
 @click.argument("paths", nargs=-1)
 @click.option("--budget", default=4000, help="Approximate character budget for the bundle.")
 @click.pass_context
@@ -236,6 +244,10 @@ def hook_stop() -> None:
 @click.pass_context
 def cypher(ctx: click.Context, query_text: str) -> None:
     """Run an arbitrary read Cypher query (escape hatch)."""
+    try:
+        assert_read_only(query_text)
+    except WriteQueryRejected as exc:
+        raise click.ClickException(str(exc))
     with _open(ctx.obj["root"]) as g:
         _emit([{k: str(v) for k, v in r.items()} for r in g.all(query_text)])
 
