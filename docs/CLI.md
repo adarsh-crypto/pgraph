@@ -32,6 +32,7 @@ pgraph [--root PATH] COMMAND [ARGS]
 | `eval` | Measure token savings vs. a flat-log baseline. |
 | `scan` | Walk the folder, recording File + nested Repo nodes. |
 | `ingest-git` | Backfill commit history (project + cloned repos). |
+| `import-chats` | Import Claude Code / Codex chat transcripts (sessions, prompts, edits). |
 | `export` | Dump the graph to git-diffable JSONL. |
 | `import` | Rebuild a graph from a JSONL export. |
 | `status` | Health summary: node/edge counts + any open session. |
@@ -144,6 +145,36 @@ pgraph ingest-git --limit 200
 `scan` walks the tree (skipping `node_modules`, `.venv`, build dirs, hidden
 dirs, etc.) and detects nested git repos as `Repo` nodes. `ingest-git`
 backfills commit history for the project root and every detected repo.
+
+### `import-chats`
+```bash
+pgraph import-chats --dry-run                 # preview — no writes
+pgraph import-chats                            # import both agents' transcripts
+pgraph import-chats --source codex             # just Codex
+pgraph import-chats --prompts truncated        # cap stored prompt text at ~200 chars
+pgraph import-chats --prompts none             # store sessions/edits but no prompt text
+pgraph import-chats --no-attribute             # skip the project-scope safety filter
+```
+Reads the agents' own session logs — Claude Code (`~/.claude/projects/<dashed-
+cwd>/*.jsonl`) and Codex (`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`) — and
+folds them into the graph as `Session`, `Prompt`, `Change` and `Skill` nodes.
+The user's **prompts** are the headline signal: the intent behind past work that
+a diff can't reconstruct.
+
+- **Deterministic, no LLM**: pure JSONL parsing and field extraction. Honors
+  pgraph's non-LLM design.
+- **Idempotent**: each transcript becomes a `Session` keyed by the agent's own
+  session id, so re-running imports nothing new.
+- **Project-scoped**: only sessions whose work happened in *this* project are
+  imported, matched by path **or project-folder name**. The name match is what
+  lets the same project's chats import after you move between machines or
+  operating systems (Windows ↔ macOS ↔ Linux); a *differently named* project is
+  still excluded. Foreign relative/Windows paths are never resolved against the
+  local working directory (which could falsely match).
+- **Privacy**: transcripts can contain secrets you typed. Use `--dry-run` to see
+  exactly what would import first; `--prompts` controls how much text is stored;
+  nothing ever leaves your machine. Importing is an explicit CLI action — it is
+  never run from a hook.
 
 ### `export` / `import`
 ```bash

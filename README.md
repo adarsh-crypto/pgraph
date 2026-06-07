@@ -87,6 +87,7 @@ person changed in `accounts/views.py`.
 | `Decision` | a manual "why" note — the intent a diff can't show |
 | `Repo` | a cloned dependency/doc repo found inside the project |
 | `Skill` | a skill/tool used in a session |
+| `Prompt` | a user prompt imported from a chat transcript — captured intent |
 
 Edges link them: `Change-[:IN_SESSION]->Session`, `Change-[:AFFECTS]->File`,
 `Decision-[:MOTIVATES]->Change`, `Decision-[:ABOUT]->File`,
@@ -130,6 +131,22 @@ pgraph scan          # record File nodes + nested cloned repos/docs
 pgraph ingest-git    # backfill commit history (project + cloned repos)
 ```
 
+Backfill from your past agent chats (Claude Code + Codex):
+
+```bash
+pgraph import-chats --dry-run   # preview which sessions would import (no writes)
+pgraph import-chats             # fold them in: sessions, prompts, edits, skills
+```
+
+This reads the agents' own session logs (`~/.claude/projects`, `~/.codex/
+sessions`), keeps only sessions whose work happened in **this** project, and
+records each user **prompt** as captured intent — the *why* behind past work
+that a diff can't show. It's purely deterministic (no LLM), idempotent, and
+nothing leaves your machine. Because attribution matches by project name, the
+same project's chats import correctly even after you move between machines or
+operating systems (Windows ↔ macOS ↔ Linux). Control prompt storage with
+`--prompts full|truncated|none` (transcripts may contain secrets you typed).
+
 Move the memory between machines:
 
 ```bash
@@ -148,8 +165,8 @@ claude mcp add pgraph -- pgraph-mcp
 ```
 
 Exposed tools: `session_start`, `session_end`, `log_change`, `log_decision`,
-`set_decision_status`, `record_skill_use`, `recent_changes`, `file_history`,
-`context_pack`, `search`, `status`, `doctor`, `sql`.
+`set_decision_status`, `record_skill_use`, `recent_changes`, `recent_prompts`,
+`file_history`, `context_pack`, `search`, `status`, `doctor`, `sql`.
 It also exposes two MCP resources — `pgraph://brief` and `pgraph://status` — so
 a client can pull project memory as context without a tool call.
 The headliner is **`context_pack(paths, budget)`** — hand it the files you're

@@ -2,7 +2,7 @@
 
 `pgraph` stores project memory in a single **SQLite** file (Python stdlib
 `sqlite3`) as two physical tables: a generic `nodes` table with a JSON `props`
-blob, plus an `edges` table. The 8 node types and 9 edge types below are the
+blob, plus an `edges` table. The 9 node types and 10 edge types below are the
 **logical** model — they're enforced by the application ([`capture.py`](../pgraph/capture.py))
 and registered in [`schema.py`](../pgraph/schema.py)'s label registry
 (`NODE_LABELS` / `REL_SPECS`), not as separate physical tables. `init()` creates
@@ -32,6 +32,7 @@ the `edges` table.
 | `Decision` | `id` | `title`, `body`, `status`, `ts` | A manual "why" note — intent a diff can't show. `status ∈ accepted\|superseded\|rejected` (new decisions start `accepted`). |
 | `Repo` | `id` | `name`, `url`, `path`, `kind` | A cloned dependency/doc repo found inside the project. `kind ∈ repo\|doc`. |
 | `Skill` | `name` | — | A skill/tool used in a session. |
+| `Prompt` | `id` | `text`, `ts`, `source` | A user prompt imported from a chat transcript (`pgraph import-chats`) — captured intent. `source ∈ claude\|codex`. |
 
 `Change.kind` is constrained at the application layer to
 `edit | create | delete | commit` (see `capture.VALID_CHANGE_KINDS`), and
@@ -52,6 +53,7 @@ session brief — a superseded or rejected "why" is stale and is filtered out.
 | `SUPERSEDES` | `Decision` → `Decision` | a newer decision replaces an older one (the old one is marked `superseded`) |
 | `USED_SKILL` | `Session` → `Skill` | this skill was used in the session |
 | `IN_REPO` | `File` → `Repo` | the file lives in a nested cloned repo |
+| `PROMPTED_IN` | `Prompt` → `Session` | this user prompt was made in that session |
 
 ## Diagram
 

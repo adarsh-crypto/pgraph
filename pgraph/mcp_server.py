@@ -121,6 +121,18 @@ def context_pack(paths: list[str] | None = None, budget: int = 4000) -> dict[str
 
 
 @mcp.tool()
+def recent_prompts(limit: int = 20) -> list[dict[str, Any]]:
+    """Recent user prompts imported from chat transcripts — the intent behind the work.
+
+    Populated by `pgraph import-chats`. Use this to recall what the user actually
+    asked for in earlier sessions (which a code diff can't show). Combine with
+    `search` to find the prompt that motivated a change.
+    """
+    with _open() as g:
+        return query.recent_prompts(g, limit=limit)
+
+
+@mcp.tool()
 def search(term: str, labels: list[str] | None = None, limit: int = 20) -> list[dict[str, Any]]:
     """Full-text search project memory (decisions, changes, files) by keyword.
 

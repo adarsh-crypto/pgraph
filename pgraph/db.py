@@ -26,6 +26,7 @@ from . import EXPORT_SUBDIR, GRAPH_SUBDIR, PGRAPH_DIR
 PK = {
     "Project": "id", "Agent": "id", "Session": "id", "Change": "id",
     "File": "path", "Decision": "id", "Repo": "id", "Skill": "name",
+    "Prompt": "id",
 }
 
 
@@ -107,6 +108,8 @@ _SEARCH_FIELDS = {
     "Repo": ("name", "url"),
     "Skill": ("name",),
     "Project": ("name",),
+    # Imported user prompts are pure intent — exactly what you want to grep for.
+    "Prompt": ("text",),
 }
 
 

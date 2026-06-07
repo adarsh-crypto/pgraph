@@ -33,6 +33,7 @@ hits a "run init first" wall.
 | `set_decision_status` | `(decision_id, status)` | Set a decision's lifecycle status: `accepted \| superseded \| rejected`. |
 | `record_skill_use` | `(session_id, skill)` | Track a skill/tool used. |
 | `recent_changes` | `(limit=20, since="", path="")` → list | Targeted recent history. |
+| `recent_prompts` | `(limit=20)` → list | Recent user prompts imported from chat transcripts — past intent a diff can't show. |
 | `file_history` | `(path)` → dict | All changes + decisions for one file. |
 | `context_pack` | `(paths=None, budget=4000)` → dict | **The token-saver** — compact bundle for the files you're about to touch. |
 | `search` | `(term, labels=None, limit=20)` → list | Full-text search (BM25) of decisions/changes/files — find the *why* by keyword. |

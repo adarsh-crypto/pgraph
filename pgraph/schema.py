@@ -15,7 +15,7 @@ from .db import Graph
 
 # Node labels and the property each one carries. Adding a label here is all it
 # takes for export/status/import to pick it up.
-NODE_LABELS = ["Project", "Agent", "Session", "Change", "File", "Decision", "Repo", "Skill"]
+NODE_LABELS = ["Project", "Agent", "Session", "Change", "File", "Decision", "Repo", "Skill", "Prompt"]
 
 # Relationship types as (rel, FROM label, TO label).
 REL_SPECS = [
@@ -29,6 +29,8 @@ REL_SPECS = [
     ("IN_REPO", "File", "Repo"),
     # A newer decision that replaces an older one: (new)-[:SUPERSEDES]->(old).
     ("SUPERSEDES", "Decision", "Decision"),
+    # A user prompt (intent) captured from an imported chat transcript.
+    ("PROMPTED_IN", "Prompt", "Session"),
 ]
 REL_TYPES = [r[0] for r in REL_SPECS]
 
