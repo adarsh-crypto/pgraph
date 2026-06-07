@@ -13,10 +13,12 @@ build/
 # user runs `pgraph install-hooks` themselves (see docs/HOOKS.md).
 .claude/
 
-# pgraph dogfoods itself: the live Kùzu DB is machine-local (gitignored below),
+# pgraph dogfoods itself: the live SQLite DB is machine-local (gitignored below),
 # but the JSONL export under .pgraph/export/ IS committed — it's the portable,
 # git-diffable snapshot of this repo's own development memory.
 
-# A project's live graph DB is machine-local; the JSONL export is what you commit.
-.pgraph/graph/
-.pgraph/graph*
+# A project's live graph DB (the SQLite file + WAL/SHM sidecars) is machine-local;
+# the JSONL export is what you commit.
+.pgraph/graph
+.pgraph/graph-wal
+.pgraph/graph-shm

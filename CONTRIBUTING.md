@@ -4,20 +4,22 @@ Thanks for your interest! pgraph is small and the contribution loop is short.
 
 ## Setup
 
-Kùzu publishes wheels for **Python 3.11–3.13** only (not 3.14 yet).
+No compiled dependencies (storage is stdlib `sqlite3`), so any **Python 3.11+**
+works — including 3.14 and later.
 
 ```bash
-conda create -y -n pgraph python=3.13   # or a venv on 3.11–3.13
-conda activate pgraph
+python -m venv .venv
+source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
 ## Before you open a PR
 
-1. **Run the tests** — `pytest -q` must be green (CI runs them on 3.11, 3.12, 3.13).
+1. **Run the tests** — `pytest -q` must be green (CI runs them on 3.11–3.14).
 2. **Add a test** for any behaviour you change or add.
-3. **Keep Cypher parameterized** — never string-format values into a query, and
-   pass only parameters the statement references (Kùzu rejects unused ones).
+3. **Keep SQL parameterized** — go through the typed `Graph` API and never
+   string-format user values into a query. The read-only `sql` passthrough must
+   stay read-only (it rejects write keywords and runs on a read-only connection).
 4. **Hook handlers must never raise** — wrap everything and return `0`.
 
 ## Extending the graph

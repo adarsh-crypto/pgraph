@@ -5,17 +5,13 @@ you want to extend `pgraph`.
 
 ## Environment
 
-Kùzu has wheels for **Python 3.11–3.13** only (not 3.14 yet). Use conda:
+`pgraph` has **zero compiled dependencies** (it uses the stdlib `sqlite3`), so it
+runs on any **Python >= 3.11**, including 3.14+. A plain venv or a conda env both
+work:
 
 ```bash
-conda create -y -n pgraph python=3.13
-conda activate pgraph
-pip install -e .
-pip install pytest
+python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
 ```
-
-> If you ever see `ERROR: Failed building wheel for kuzu`, you're almost
-> certainly on Python 3.14. Recreate the env on 3.13.
 
 ## Running the tests
 
@@ -23,7 +19,7 @@ pip install pytest
 pytest -q
 ```
 
-The suite (12 tests) covers:
+The suite (26 tests) covers:
 
 | File | What it verifies |
 |------|------------------|
@@ -31,6 +27,8 @@ The suite (12 tests) covers:
 | `tests/test_capture.py` | Sessions, changes, decisions, skills, and their edges. |
 | `tests/test_query.py` | Ordering, path filtering, `file_history`, `context_pack` budgeting. |
 | `tests/test_export_roundtrip.py` | export → wipe → import → identical. |
+| `tests/test_status_and_guard.py` | `status()` and the read-only `sql` guard. |
+| `tests/test_session_brief.py` | The `SessionStart` brief, `scan --exclude`, and `SessionStart` hook install. |
 
 Fixtures live in `tests/conftest.py` (`graph` and `root`).
 
@@ -39,8 +37,8 @@ Fixtures live in `tests/conftest.py` (`graph` and `root`).
 ```
 pgraph/
   __init__.py        version + path constants
-  db.py              Graph handle, project-root discovery
-  schema.py          DDL, init(), now(), new_id()
+  db.py              Graph handle, project-root discovery, sqlite node/edge store
+  schema.py          label registry, init(), now(), new_id()
   capture.py         write side (sessions/changes/decisions/skills)
   query.py           read side (recent_changes, file_history, context_pack, …)
   scan.py            folder walk + git ingest
@@ -59,27 +57,30 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for how these fit together.
 
 To add a new node or relationship type:
 
-1. Add the `CREATE ... TABLE IF NOT EXISTS` DDL to `NODE_TABLES` /`REL_TABLES`
-   in [`schema.py`](../pgraph/schema.py). Because `init()` is idempotent,
-   existing graphs pick it up on the next `init` with no migration script.
+1. Add the new label to `NODE_LABELS` (or the `(rel, FROM, TO)` tuple to
+   `REL_SPECS`) in [`schema.py`](../pgraph/schema.py). Because `init()` is
+   idempotent, existing graphs pick it up on the next `init` with no migration
+   script.
 2. Add write helpers in [`capture.py`](../pgraph/capture.py) and read helpers
    in [`query.py`](../pgraph/query.py).
-3. Register the node/rel in the `_NODE_SPECS` / `_PK` / `_REL_SPECS` tables in
-   [`export.py`](../pgraph/export.py) so it survives export/import.
+3. Export derives nodes from `schema.NODE_LABELS` and edges from
+   `schema.REL_SPECS`, and the primary-key map is `PK` in
+   [`db.py`](../pgraph/db.py) — so adding to the schema registry plus `PK` is
+   what makes the new type survive export/import.
 4. If agents should reach it, add an `@mcp.tool()` in
    [`mcp_server.py`](../pgraph/mcp_server.py) and a Click command in
    [`cli.py`](../pgraph/cli.py).
 5. Add a test.
 
 The export step (3) is the one that's easy to forget — a node type missing from
-`_NODE_SPECS` simply won't be exported, and the round-trip test won't catch a
-type it doesn't know about.
+`NODE_LABELS` (or `PK`) simply won't be exported, and the round-trip test won't
+catch a type it doesn't know about.
 
 ## Conventions
 
-- All Cypher is **parameterized** — never string-format user values into a
-  query. Kùzu also rejects parameters that the statement doesn't reference, so
-  pass only what you use (see the import path in `export.py`).
+- All SQL goes through the typed `Graph` API (parameterized queries via
+  `sqlite3`) — never string-format user values into a query. The read-only `sql`
+  passthrough runs on a read-only connection and rejects write keywords.
 - Read helpers return plain JSON-serializable dicts/lists; datetimes are
   rendered to ISO strings at the boundary (`query._iso`).
 - Hook handlers must never raise. Wrap everything and return `0`.
@@ -87,8 +88,9 @@ type it doesn't know about.
 
 ## Conda env reuse
 
-This repo was built in a conda env named `pgraph`
-(`/Users/adarshsinha/anaconda3/envs/pgraph`, Python 3.13). Activate it with:
+This is optional now — there are no compiled deps, so any venv or env works. But
+the conda env named `pgraph` (`/Users/adarshsinha/anaconda3/envs/pgraph`, Python
+3.13) this repo was built in still works. Activate it with:
 
 ```bash
 source /Users/adarshsinha/anaconda3/etc/profile.d/conda.sh && conda activate pgraph

@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Kùzu publishes wheels for 3.11–3.13 only (no 3.14 yet).
-        python-version: ["3.11", "3.12", "3.13"]
+        # Zero compiled deps (stdlib sqlite3), so test the full supported range.
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4

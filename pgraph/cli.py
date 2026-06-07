@@ -205,7 +205,10 @@ def export_cmd(ctx: click.Context) -> None:
 def import_cmd(ctx: click.Context) -> None:
     """Load a JSONL export into a freshly initialized graph."""
     root = ctx.obj["root"]
-    g = schema_init(root)
+    # Create the schema tables but NOT the bootstrap Project node — the real
+    # Project comes from the export, so bootstrapping would duplicate it.
+    g = Graph(root)
+    g.init_schema()
     try:
         out = export_mod.import_graph(g, root)
     finally:
@@ -251,14 +254,19 @@ def hook_session_start() -> None:
 @main.command()
 @click.argument("query_text")
 @click.pass_context
-def cypher(ctx: click.Context, query_text: str) -> None:
-    """Run an arbitrary read Cypher query (escape hatch)."""
+def sql(ctx: click.Context, query_text: str) -> None:
+    """Run an arbitrary read-only SQL query against the graph (escape hatch).
+
+    The store is two tables: nodes(label, pk, props) and
+    edges(rel, src_label, src_pk, dst_label, dst_pk), where props is JSON
+    (use json_extract(props, '$.field')).
+    """
     try:
         assert_read_only(query_text)
     except WriteQueryRejected as exc:
         raise click.ClickException(str(exc))
     with _open(ctx.obj["root"]) as g:
-        _emit([{k: str(v) for k, v in r.items()} for r in g.all(query_text)])
+        _emit([{k: str(v) for k, v in r.items()} for r in g.sql(query_text)])
 
 
 if __name__ == "__main__":  # pragma: no cover

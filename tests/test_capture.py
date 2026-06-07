@@ -11,24 +11,12 @@ def test_session_change_decision_links(graph):
     )
 
     # Change -> Session
-    assert graph.one(
-        "MATCH (c:Change {id:$c})-[:IN_SESSION]->(s:Session {id:$s}) RETURN c.id AS id",
-        {"c": cid, "s": sid},
-    )
+    assert graph.has_edge("IN_SESSION", "Change", cid, "Session", sid)
     # Change -> File
-    assert graph.one(
-        "MATCH (c:Change {id:$c})-[:AFFECTS]->(f:File {path:'src/auth.py'}) RETURN c.id AS id",
-        {"c": cid},
-    )
+    assert graph.has_edge("AFFECTS", "Change", cid, "File", "src/auth.py")
     # Decision -> Change and Decision -> File
-    assert graph.one(
-        "MATCH (d:Decision {id:$d})-[:MOTIVATES]->(c:Change {id:$c}) RETURN d.id AS id",
-        {"d": did, "c": cid},
-    )
-    assert graph.one(
-        "MATCH (d:Decision {id:$d})-[:ABOUT]->(f:File {path:'src/auth.py'}) RETURN d.id AS id",
-        {"d": did},
-    )
+    assert graph.has_edge("MOTIVATES", "Decision", did, "Change", cid)
+    assert graph.has_edge("ABOUT", "Decision", did, "File", "src/auth.py")
 
 
 def test_invalid_change_kind_rejected(graph):
@@ -48,7 +36,4 @@ def test_skill_use_is_deduped(graph):
     sid = capture.start_session(graph, "claude-code")
     capture.record_skill_use(graph, sid, "deep-research")
     capture.record_skill_use(graph, sid, "deep-research")
-    n = graph.one(
-        "MATCH (s:Session {id:$s})-[r:USED_SKILL]->(:Skill) RETURN count(r) AS c", {"s": sid}
-    )
-    assert n["c"] == 1
+    assert graph.count_edges("USED_SKILL") == 1

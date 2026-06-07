@@ -7,7 +7,7 @@ need.
 | Doc | What's inside |
 |-----|---------------|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | The big picture: modules, layers, data flow, design decisions. |
-| [SCHEMA.md](SCHEMA.md) | The graph data model — node/relationship tables, IDs, timestamps, example Cypher. |
+| [SCHEMA.md](SCHEMA.md) | The graph data model — node/relationship types, IDs, timestamps, example SQL. |
 | [CLI.md](CLI.md) | Every `pgraph` command with examples. |
 | [MCP.md](MCP.md) | The MCP server: registration and the tools agents call. |
 | [CONTEXT_PACK.md](CONTEXT_PACK.md) | The headline token-saving query, in depth. |
@@ -18,7 +18,8 @@ need.
 ## The one-paragraph version
 
 `pgraph` gives a coding agent a per-project memory backed by an embedded graph
-database (Kùzu) instead of a growing markdown log. Changes, decisions,
+in a single, dependency-free SQLite file instead of a growing markdown log.
+Changes, decisions,
 sessions, files, repos and skills are recorded as timestamped nodes; an agent
 queries a small, targeted slice — chiefly via
 [`context_pack`](CONTEXT_PACK.md) — instead of re-reading everything, which

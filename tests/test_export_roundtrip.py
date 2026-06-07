@@ -1,18 +1,11 @@
-import shutil
-
 from pgraph import capture, export as export_mod, query
 from pgraph.db import graph_path
 from pgraph.schema import init
 
 
 def _wipe_graph(tmp_path):
-    """Kùzu may store the DB as a single file or a directory — remove either."""
+    """Remove the SQLite graph file and its WAL/SHM sidecars."""
     p = graph_path(tmp_path)
-    if p.is_dir():
-        shutil.rmtree(p)
-    elif p.exists():
-        p.unlink()
-    # Remove the wal/shadow sidecar files Kùzu leaves next to the DB.
     for sidecar in p.parent.glob(p.name + "*"):
         if sidecar.is_file():
             sidecar.unlink()
@@ -41,10 +34,7 @@ def test_export_import_roundtrip(tmp_path):
     hist = query.file_history(g2, "src/auth.py")
     assert len(hist["changes"]) == 1
     assert hist["decisions"][0]["title"] == "JWT"
-    assert g2.one(
-        "MATCH (d:Decision)-[:MOTIVATES]->(c:Change) RETURN d.title AS t"
-    )["t"] == "JWT"
-    assert g2.one(
-        "MATCH (:Session)-[:USED_SKILL]->(sk:Skill) RETURN sk.name AS n"
-    )["n"] == "deep-research"
+    assert query.decisions_for(g2, cid)[0]["title"] == "JWT"
+    assert g2.count_edges("USED_SKILL") == 1
+    assert g2.get_node("Skill", "deep-research") is not None
     g2.close()

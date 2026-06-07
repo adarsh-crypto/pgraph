@@ -16,10 +16,13 @@ record usually accretes in a markdown log. That log has two failure modes:
    touched `auth.py`?" without scanning every line.
 
 `pgraph` replaces the flat log with an **embedded property graph**. The agent
-asks a precise question and gets back only the matching nodes. Multi-hop
-questions ("change → session → decision") stay cheap because Kùzu uses
-index-free adjacency: each node holds direct pointers to its neighbours, so a
-traversal is a pointer-chase, not a join.
+asks a precise question and gets back only the matching nodes. The graph lives
+in a single SQLite file as two tables — `nodes(label, pk, props)` and
+`edges(rel, src_label, src_pk, dst_label, dst_pk)` — the "simple-graph"
+pattern. Multi-hop questions ("change → session → decision") stay cheap because
+the edge table is indexed on both `(rel, src_label, src_pk)` and
+`(rel, dst_label, dst_pk)`: the 1-2 hop lookups pgraph actually needs are
+indexed joins, which SQLite handles trivially.
 
 ## Layered design
 
@@ -41,18 +44,18 @@ identical code paths, so there is exactly one place a behaviour can be wrong.
                 │   capture.py / query.py    │   write side / read side
                 │   scan.py / export.py      │   ingest / portability
                 └─────────────┬─────────────┘
-                              │  parameterized Cypher
+                              │  typed node/edge API
                        ┌──────┴──────┐
-                       │   db.py     │   Graph: open / run / one / all / close
+                       │   db.py     │   Graph: add_node / match_nodes / add_edge / neighbors / sql
                        └──────┬──────┘
                               │
                        ┌──────┴──────┐
-                       │  schema.py  │   DDL + idempotent init
+                       │  schema.py  │   label registry + idempotent init
                        └──────┬──────┘
                               │
-                    ┌─────────┴─────────┐
-                    │  Kùzu (embedded)  │   <project>/.pgraph/graph
-                    └───────────────────┘
+                  ┌───────────┴───────────┐
+                  │ SQLite (stdlib sqlite3)│   <project>/.pgraph/graph
+                  └───────────────────────┘
 ```
 
 ## Module responsibilities
@@ -60,8 +63,8 @@ identical code paths, so there is exactly one place a behaviour can be wrong.
 | Module | Responsibility |
 |--------|----------------|
 | [`__init__.py`](../pgraph/__init__.py) | Version + the `.pgraph/`, `graph`, `export` path constants. |
-| [`db.py`](../pgraph/db.py) | Locate the project root, open the Kùzu DB, and expose a `Graph` handle with `run`/`one`/`all`/`close`. Materializes rows into plain dicts so no caller ever touches a Kùzu cursor. |
-| [`schema.py`](../pgraph/schema.py) | All `CREATE NODE/REL TABLE IF NOT EXISTS` DDL, `init()`, plus `now()` and `new_id()`. Re-running `init()` is a lightweight migration. |
+| [`db.py`](../pgraph/db.py) | Locate the project root, open the SQLite file (WAL mode), and expose a typed `Graph` handle over the `nodes`/`edges` tables: `add_node`/`get_node`/`set_node_props`/`match_nodes`/`count_nodes`, `add_edge`/`has_edge`/`count_edges`/`out_neighbors`/`in_neighbors`/`all_edges`, plus a read-only `sql()` passthrough. Props are stored as a JSON blob and returned as plain dicts. |
+| [`schema.py`](../pgraph/schema.py) | The **label registry**: `NODE_LABELS`, `REL_SPECS` (`(rel, FROM, TO)` tuples), and `REL_TYPES`. `init()` calls `Graph.init_schema()` (creates the two tables + edge indexes) then ensures one `Project` node; re-running it is safe and idempotent. Also exposes `now()` and `new_id()`. |
 | [`capture.py`](../pgraph/capture.py) | The **write side**: sessions, changes, decisions, skills, files, and the edges between them. |
 | [`query.py`](../pgraph/query.py) | The **read side**: `recent_changes`, `file_history`, `decisions_for`, `session_summary`, and the headline `context_pack`. |
 | [`scan.py`](../pgraph/scan.py) | Populate `File`/`Repo` nodes from the folder tree and backfill git commit history. |
@@ -81,8 +84,9 @@ When an agent edits `src/auth.py` in a project with hooks installed:
    against the project root.
 3. It finds the latest open session (or auto-opens one so no edit is dropped),
    then calls [`capture.log_change`](../pgraph/capture.py).
-4. `log_change` creates a `Change` node, `MERGE`s the `File` node, and links
-   `Change-[:AFFECTS]->File` and `Change-[:IN_SESSION]->Session`.
+4. `log_change` does `add_node` for the `Change`, upserts the `File` node
+   (`get_node` then `add_node` if missing), and links them with
+   `add_edge("AFFECTS", ...)` and `add_edge("IN_SESSION", ...)`.
 5. On **Stop**, `pgraph hook-stop` ends the session and writes a fresh JSONL
    export snapshot.
 
@@ -100,13 +104,30 @@ re-reading the whole history.
   edits in the same second still order deterministically.
 - **Hooks never raise.** Every hook handler swallows all exceptions — a memory
   hiccup must never block the user's real work.
-- **JSONL is the insurance.** The Kùzu file is the primary store, but the
+- **JSONL is the insurance.** The SQLite file is the primary store, but the
   diffable JSONL export is what you commit and what survives an engine swap.
 
-## Why Kùzu
+## Why SQLite (stdlib)
 
-Kùzu is an embedded (in-process, no server) native graph database with
-index-free adjacency, Cypher support, and single-file on-disk storage. That
-combination matches the requirements exactly: zero-ops, fast multi-hop
-traversal, and a memory you can copy as a file. See
-[SCHEMA.md](SCHEMA.md#why-kùzu-and-the-version-pin) for the version-pin caveat.
+The graph is stored in a single SQLite file via Python's standard-library
+`sqlite3` module — two tables (`nodes` and `edges`), indexed for the simple
+1-2 hop lookups pgraph does. The escape hatch is a read-only `sql` tool/command
+that queries those tables directly (props come out via
+`json_extract(props, '$.field')`); write keywords are rejected by
+`assert_read_only`, and reads run on a read-only connection as a hard backstop.
+
+This deliberately replaced Kùzu after Kùzu's repository was archived in October
+2025. The rationale:
+
+- **Zero storage dependencies.** Storage is the standard library, so the only
+  remaining runtime deps are `mcp` and `click`. The engine can never be
+  "archived out from under us" — it ships with Python itself.
+- **Future-proof across Python versions.** Works on all Python versions,
+  including 3.14+. Kùzu was wheel-locked to 3.11–3.13.
+- **No compiled artifact.** Nothing to build or pin per platform.
+- **Durable and crash-safe.** WAL journal mode is enabled, so writes survive a
+  crash mid-edit.
+- **Single-file and portable.** Still a memory you can copy as a file — and
+  much smaller: one real project's graph went from 13 MB to 2.0 MB (~6.5x).
+- **Simple-graph node/edge pattern.** Index-free adjacency is gone, but pgraph
+  only ever does 1-2 hop lookups, which indexed SQLite joins handle trivially.

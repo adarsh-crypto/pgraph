@@ -35,7 +35,7 @@ hits a "run init first" wall.
 | `file_history` | `(path)` → dict | All changes + decisions for one file. |
 | `context_pack` | `(paths=None, budget=4000)` → dict | **The token-saver** — compact bundle for the files you're about to touch. |
 | `status` | `()` → dict | Node/edge counts + any open session. |
-| `cypher` | `(query_text)` → list | Arbitrary **read-only** query (writes rejected). |
+| `sql` | `(query_text)` → list | Arbitrary **read-only** SQL over the nodes/edges tables (writes rejected). |
 
 ## The headline: `context_pack`
 

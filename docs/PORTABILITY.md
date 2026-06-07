@@ -7,25 +7,28 @@ git. There are two layers to this, with different jobs.
 ## Two layers
 
 ### 1. The primary store — `.pgraph/graph`
-The live Kùzu database. Copy this single file and you've moved the entire
-memory, instantly and losslessly. It's the fast path the CLI/MCP/hooks read and
-write. But it's a binary, engine-specific format — not something you want to
-diff in git, and not guaranteed to load on a different Kùzu version.
+The live SQLite database (a single file). Copy this single file and you've moved
+the entire memory, instantly and losslessly. It's the fast path the CLI/MCP/hooks
+read and write. It's a standard SQLite file — but it's binary, so it's not
+something you want to diff in git; the JSONL export remains the diffable,
+reviewable form.
 
 ### 2. The insurance — `.pgraph/export/{nodes,edges}.jsonl`
 A human-readable, line-oriented dump of every node and edge. This is:
 
 - **git-diffable** — each node/edge is one JSON line, so a commit shows exactly
   what changed in your project memory;
-- **engine-independent** — it can be re-imported even across Kùzu versions, and
-  is the migration path if the engine is ever swapped;
+- **engine-independent** — it can be re-imported on any machine / Python
+  version, and is the migration path if the engine is ever swapped (it's how the
+  live graphs were migrated off Kùzu);
 - **the thing you commit** — the live DB is gitignored; the export is tracked.
 
 ## The git split (see [`.gitignore`](../.gitignore))
 
 ```gitignore
-.pgraph/graph/      # live DB — machine-local, gitignored
-.pgraph/graph*      # and its wal/shadow sidecars
+.pgraph/graph       # live SQLite file — machine-local, gitignored
+.pgraph/graph-wal   # WAL sidecar — gitignored
+.pgraph/graph-shm   # shared-memory sidecar — gitignored
 # .pgraph/export/   # NOT ignored — commit this
 ```
 
@@ -54,10 +57,11 @@ session, so a fresh snapshot always exists without you remembering to dump it.
 { "rel": "AFFECTS", "from": "Change", "to": "File", "src": "ab12…", "dst": "src/auth.py" }
 ```
 
-Timestamps are serialized as ISO-8601 strings and parsed back into `TIMESTAMP`
-columns on import (`export._deser`). Import is **idempotent for nodes**: it
-`MERGE`s each node on its primary key, then sets the remaining properties — so
-re-importing the same export won't create duplicates.
+Timestamps are ISO-8601 strings both in the export and in storage — they stay
+strings in the JSON props (there's no separate deserialization step or
+`TIMESTAMP` column). Import is **idempotent**: it adds each node keyed on
+`(label, primary key)` via `add_node` (`INSERT OR IGNORE`), so re-importing the
+same export won't create duplicates.
 
 ## Moving memory between machines
 
