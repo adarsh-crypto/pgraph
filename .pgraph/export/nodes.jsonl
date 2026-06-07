@@ -1,7 +1,7 @@
 {"label": "Project", "props": {"id": "3d1bd9681a234e9da26f32781d40cbbd", "name": "Project_graph", "root_path": "/Users/adarshsinha/Desktop/Project_graph", "created_at": "2026-06-07T13:47:48.025263"}}
 {"label": "Agent", "props": {"id": "claude-code", "name": "claude-code"}}
 {"label": "Session", "props": {"id": "273b11311afe4798841f8d1039e783fd", "agent_name": "claude-code", "started_at": "2026-06-07T13:49:45.467257", "ended_at": "2026-06-07T13:49:56.205818", "summary": "Polish pass complete; 21 tests green"}}
-{"label": "Session", "props": {"id": "4dd4fd9e962c455eb0a6467d597c528b", "agent_name": "claude-code", "started_at": "2026-06-07T16:33:47.508865", "ended_at": null, "summary": ""}}
+{"label": "Session", "props": {"id": "4dd4fd9e962c455eb0a6467d597c528b", "agent_name": "claude-code", "started_at": "2026-06-07T16:33:47.508865", "ended_at": "2026-06-07T16:35:48.683417", "summary": ""}}
 {"label": "Session", "props": {"id": "b3b740d2a6ae4e20b9eb531e27336bec", "agent_name": "claude-code", "started_at": "2026-06-07T13:50:41.546105", "ended_at": "2026-06-07T13:55:31.795301", "summary": ""}}
 {"label": "Session", "props": {"id": "d95dcd51a5984da39b8cd29b68335e32", "agent_name": "claude-code", "started_at": "2026-06-07T16:23:37.297368", "ended_at": "2026-06-07T16:30:31.486327", "summary": ""}}
 {"label": "Session", "props": {"id": "f481794efd1140a388d0f9276b47c67a", "agent_name": "claude-code", "started_at": "2026-06-07T14:36:31.149369", "ended_at": "2026-06-07T14:49:51.677987", "summary": ""}}
