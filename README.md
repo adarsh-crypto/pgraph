@@ -30,16 +30,17 @@ indexed joins, and stay cheap as history grows.
 
 ### Measured savings
 
-On this repo's own memory (135 nodes) and the Spokesfan project (4,557 nodes),
-versus an agent re-reading the equivalent flat markdown log each turn
-(token counts estimated at ~4 chars/token):
+Run `pgraph eval` on any project to get these numbers for yourself. On this
+repo's own memory, versus an agent re-reading the equivalent flat markdown log
+each turn (token counts estimated at ~4 chars/token, or exact if `tiktoken` is
+installed):
 
-| What the agent loads | pgraph (this repo) | Spokesfan |
-|----------------------|-------------------:|----------:|
-| Flat log — re-read everything | ~1,593 tok | ~1,902 tok |
-| `session_brief` — injected automatically on open | **~244 tok** | **~292 tok** |
-| `context_pack` — one targeted query | ~904 tok | ~1,181 tok |
-| **Reduction (brief vs flat)** | **~85%** | **~85%** |
+| What the agent loads | pgraph (this repo) |
+|----------------------|-------------------:|
+| Flat log — re-read everything | ~1,593 tok |
+| `session_brief` — injected automatically on open | **~244 tok** |
+| `context_pack` — one targeted query | ~904 tok |
+| **Reduction (brief vs flat)** | **~85%** |
 
 The real win is **scaling**: a flat log grows linearly and unbounded, while the
 auto-injected brief stays budget-bounded (~constant). The gap widens with every
@@ -54,6 +55,26 @@ session:
 
 A 1,000-edit project would burn ~43k tokens *per turn* just re-reading its log;
 pgraph keeps that bounded to a few hundred, querying for more only when needed.
+
+### Worked example: a large Django codebase
+
+Picture a mature Django service — hundreds of models, views and migrations,
+years of commits, several apps in one repo. An agent asked to *"add rate
+limiting to the login endpoint"* normally needs to rediscover context every
+turn: which middleware exists, why sessions were chosen over JWT, what the last
+person changed in `accounts/views.py`.
+
+- **Without pgraph:** that context lives in a sprawling `NOTES.md` (or nowhere),
+  so the agent re-reads thousands of tokens of history each turn — or, worse,
+  re-derives decisions that were already made and reverses them.
+- **With pgraph:** on open, the `SessionStart` brief injects ~250 tokens — the
+  last session's intent and recent decisions. Then one call,
+  `context_pack(["accounts/views.py", "accounts/middleware.py"])`, returns just
+  the recent changes and the *why* notes for those files. A
+  `search("rate limit")` surfaces any prior decision on the topic in
+  milliseconds. The agent starts informed, on a few hundred tokens instead of
+  tens of thousands — and the cost stays flat as the codebase and its history
+  keep growing.
 
 ## What it records
 

@@ -67,8 +67,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   read-only SQL query over the nodes/edges tables (`json_extract(props, '$.x')`).
   Write statements are rejected *and* the query runs on a read-only connection.
 - Existing graphs migrate losslessly via the JSONL export: `pgraph import`
-  rebuilds the SQLite store from `.pgraph/export/*.jsonl` (the live Project_graph
-  and Spokesfan graphs were migrated this way with zero data loss).
+  rebuilds the SQLite store from `.pgraph/export/*.jsonl` with zero data loss.
 - Docs updated throughout (ARCHITECTURE, SCHEMA, PORTABILITY, DEVELOPMENT,
   README, CLI, MCP) to reflect the SQLite design.
 
